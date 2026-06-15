@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, ScrollView, Button } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import Taro, { useDidShow } from '@tarojs/taro';
 import styles from './index.module.scss';
 import { mockAgencies } from '@/data/mockAnalysis';
 import { useDiaryStore } from '@/store/useDiaryStore';
+import { detectStressType } from '@/utils/emotion';
+import { formatDate } from '@/utils/date';
 
 const suggestions = [
   {
@@ -43,10 +45,34 @@ const categoryMap: Record<string, string> = {
 
 const categoryOrder = ['breath', 'sleep', 'activity', 'social', 'mindfulness'];
 
+const stressIconMap: Record<string, string> = {
+  anxiety: '😰',
+  fatigue: '😴',
+  low_mood: '😢',
+  anger: '😠',
+  mixed: '🌤️'
+};
+
 const WarningPage: React.FC = () => {
+  const diaries = useDiaryStore(state => state.diaries);
   const copingTasks = useDiaryStore(state => state.appState.copingTasks);
+  const planGeneratedDate = useDiaryStore(state => state.appState.planGeneratedDate);
   const toggleCopingTask = useDiaryStore(state => state.toggleCopingTask);
-  const resetCopingTasks = useDiaryStore(state => state.resetCopingTasks);
+  const regenerateCopingPlan = useDiaryStore(state => state.regenerateCopingPlan);
+  const ensurePlanUpToDate = useDiaryStore(state => state.ensurePlanUpToDate);
+
+  useEffect(() => {
+    ensurePlanUpToDate();
+  }, [ensurePlanUpToDate]);
+
+  useDidShow(() => {
+    ensurePlanUpToDate();
+  });
+
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const sevenDaysDiaries = diaries.filter(d => new Date(d.date) >= sevenDaysAgo);
+  const { type, label, description } = detectStressType(sevenDaysDiaries);
 
   const completedCount = copingTasks.filter(t => t.completed).length;
   const totalCount = copingTasks.length;
@@ -59,16 +85,31 @@ const WarningPage: React.FC = () => {
     return acc;
   }, []);
 
-  const handleResetPlan = () => {
+  const handleRegeneratePlan = () => {
     Taro.showModal({
-      title: '重置计划',
-      content: '确定要重置所有调适任务吗？已完成的项目将恢复为未完成状态。',
-      confirmText: '确定重置',
+      title: '重新生成计划',
+      content: '确定要重新生成今日调适计划吗？当前进度将被重置。',
+      confirmText: '重新生成',
       cancelText: '取消',
       confirmColor: '#FF6B6B',
       success: (res) => {
         if (res.confirm) {
-          resetCopingTasks();
+          regenerateCopingPlan();
+        }
+      }
+    });
+  };
+
+  const handleStressRegen = () => {
+    Taro.showModal({
+      title: '换一份计划',
+      content: '确定要换一份调适计划吗？当前进度将被重置。',
+      confirmText: '换一份',
+      cancelText: '取消',
+      confirmColor: '#FF6B6B',
+      success: (res) => {
+        if (res.confirm) {
+          regenerateCopingPlan();
         }
       }
     });
@@ -92,6 +133,12 @@ const WarningPage: React.FC = () => {
     });
   };
 
+  const getPriorityBadge = (priority: number) => {
+    if (priority === 1) return '🔥';
+    if (priority === 2) return '⭐';
+    return '';
+  };
+
   return (
     <ScrollView className={styles.page} scrollY>
       <View className={styles.header}>
@@ -107,6 +154,15 @@ const WarningPage: React.FC = () => {
           <Text className={styles.crisisDesc}>如果情绪严重影响生活，请拨打心理援助热线</Text>
         </View>
         <Text className={styles.crisisArrow}>›</Text>
+      </View>
+
+      <View className={styles.stressCard}>
+        <Text className={styles.stressIcon}>{stressIconMap[type] || '🌤️'}</Text>
+        <View style={{ flex: 1 }}>
+          <Text className={styles.stressTitle}>检测结果：{label}</Text>
+          <Text className={styles.stressDesc}>{description}</Text>
+        </View>
+        <Text className={styles.stressRegenBtn} onClick={handleStressRegen}>换一份计划</Text>
       </View>
 
       <View className={styles.planSection}>
@@ -136,18 +192,32 @@ const WarningPage: React.FC = () => {
                 </View>
                 <Text className={styles.taskIcon}>{task.icon}</Text>
                 <View className={styles.taskInfo}>
-                  <Text className={`${styles.taskTitle} ${task.completed ? styles.taskTitleCompleted : ''}`}>
-                    {task.title}
-                  </Text>
+                  <View style={{ display: 'flex', alignItems: 'center' }}>
+                    <Text className={`${styles.taskTitle} ${task.completed ? styles.taskTitleCompleted : ''}`}>
+                      {task.title}
+                    </Text>
+                    {getPriorityBadge(task.priority) ? (
+                      <Text className={styles.priorityBadge}>{getPriorityBadge(task.priority)}</Text>
+                    ) : null}
+                  </View>
                   <Text className={styles.taskDesc}>{task.desc}</Text>
+                  {task.completed && task.completedAt ? (
+                    <Text className={styles.completedTime}>完成于 {formatDate(task.completedAt, 'HH:mm')}</Text>
+                  ) : null}
                 </View>
               </View>
             ))}
           </View>
         ))}
 
-        <Button className={styles.resetBtn} onClick={handleResetPlan}>
-          重置计划
+        <View className={styles.planMetaRow}>
+          {planGeneratedDate ? (
+            <Text>今日计划生成于 {formatDate(planGeneratedDate, 'MM月DD日')}</Text>
+          ) : <Text />}
+        </View>
+
+        <Button className={styles.resetBtn} onClick={handleRegeneratePlan}>
+          重新生成今日计划
         </Button>
       </View>
 

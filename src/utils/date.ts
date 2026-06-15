@@ -91,3 +91,27 @@ export const getDateRange = (range: DateRangeInput): { dates: string[]; start: s
     end: formatDate(endDate, 'YYYY-MM-DD')
   };
 };
+
+export const getPrevDateRange = (range: { start: string; end: string }): { dates: string[]; start: string; end: string } => {
+  const startDate = new Date(range.start);
+  const endDate = new Date(range.end);
+  const dayCount = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24) + 1;
+
+  const prevEnd = new Date(startDate);
+  prevEnd.setDate(startDate.getDate() - 1);
+  const prevStart = new Date(prevEnd);
+  prevStart.setDate(prevEnd.getDate() - (dayCount - 1));
+
+  const dates: string[] = [];
+  const current = new Date(prevStart);
+  while (current <= prevEnd) {
+    dates.push(formatDate(current, 'YYYY-MM-DD'));
+    current.setDate(current.getDate() + 1);
+  }
+
+  return {
+    dates,
+    start: formatDate(prevStart, 'YYYY-MM-DD'),
+    end: formatDate(prevEnd, 'YYYY-MM-DD')
+  };
+};

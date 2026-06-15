@@ -72,6 +72,37 @@
   border: 2rpx solid #eee;
 }
 
+.datePicker {
+  flex: 1;
+  background: #FFF;
+  border: 1rpx solid #E5E5E5;
+  border-radius: $radius-md;
+  padding: $spacing-sm $spacing-md;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+}
+
+.customEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-xl;
+  min-height: 200rpx;
+}
+
+.customEmptyIcon {
+  font-size: 80rpx;
+  margin-bottom: $spacing-md;
+}
+
+.customEmptyText {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+}
+
 .warningBanner {
   display: flex;
   align-items: center;
@@ -204,6 +235,109 @@
 .emptyText {
   font-size: $font-size-md;
   color: $color-text-tertiary;
+}
+
+.compareSection {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md $spacing-lg;
+  box-shadow: 0 2rpx 16rpx rgba(255, 155, 123, 0.06);
+}
+
+.compareRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md 0;
+  border-bottom: 1rpx solid #F0F0F0;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &.kwCompareRow {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: $spacing-sm;
+  }
+}
+
+.compareLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.compareValues {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.comparePrev {
+  font-size: $font-size-sm;
+  color: #999;
+}
+
+.compareCurrent {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+}
+
+.compareArrow {
+  font-size: $font-size-sm;
+  color: #CCC;
+}
+
+.compareUp {
+  font-size: 24rpx;
+  color: #4CAF50;
+  margin-left: 4rpx;
+}
+
+.compareDown {
+  font-size: 24rpx;
+  color: #FF6B6B;
+  margin-left: 4rpx;
+}
+
+.compareFlat {
+  font-size: 24rpx;
+  color: #999;
+  margin-left: 4rpx;
+}
+
+.compareKwContainer {
+  display: flex;
+  width: 100%;
+  gap: $spacing-md;
+}
+
+.compareKwCol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.compareKwTitle {
+  font-size: 22rpx;
+  color: #999;
+  margin-bottom: 4rpx;
+}
+
+.compareKwItem {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  padding: 4rpx 12rpx;
+  background: #F8F8F8;
+  border-radius: 6rpx;
+  align-self: flex-start;
+}
+
+.compareKwEmpty {
+  font-size: $font-size-sm;
+  color: #CCC;
 }
 
 .monthlyCard {

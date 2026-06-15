@@ -70,6 +70,44 @@
   opacity: 0.8;
 }
 
+.stressCard {
+  background: linear-gradient(135deg, #FFE8E8 0%, #FFF8F5 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.stressIcon {
+  font-size: 64rpx;
+  flex-shrink: 0;
+}
+
+.stressTitle {
+  display: block;
+  font-size: $font-size-md;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+}
+
+.stressDesc {
+  display: block;
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  margin-top: 4rpx;
+  line-height: $line-height-normal;
+}
+
+.stressRegenBtn {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  align-self: flex-end;
+  flex-shrink: 0;
+  padding: $spacing-xs $spacing-sm;
+}
+
 .planSection {
   background: $color-bg-card;
   border-radius: $radius-lg;
@@ -183,10 +221,31 @@
   color: $color-text-tertiary;
 }
 
+.priorityBadge {
+  margin-left: auto;
+  font-size: 20rpx;
+  flex-shrink: 0;
+}
+
 .taskDesc {
   font-size: $font-size-sm;
   color: $color-text-secondary;
   line-height: $line-height-loose;
+}
+
+.completedTime {
+  display: block;
+  font-size: 20rpx;
+  color: #4CAF50;
+  margin-top: 4rpx;
+}
+
+.planMetaRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: $font-size-xs;
+  color: #999;
+  margin-top: $spacing-md;
 }
 
 .resetBtn {

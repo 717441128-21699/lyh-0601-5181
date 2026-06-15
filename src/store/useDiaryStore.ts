@@ -6,6 +6,7 @@ import { mockPosts } from '@/data/mockPosts';
 import { mockBadges } from '@/data/mockAnalysis';
 import { getStorage, setStorage } from '@/utils/storage';
 import { getToday, formatDate } from '@/utils/date';
+import { detectStressType, generateCopingPlan } from '@/utils/emotion';
 
 const transformedMockPosts = mockPosts.map(p => ({
   ...p,
@@ -18,18 +19,24 @@ const defaultReminders: ReminderSettings = {
   ]
 };
 
-const defaultCopingTasks: CopingTask[] = [
-  { id: 'b1', title: '4-7-8呼吸法', desc: '吸气4秒，屏住7秒，呼出8秒，重复3次', icon: '🌬️', completed: false, category: 'breath' },
-  { id: 'b2', title: '腹式深呼吸', desc: '手放腹部，慢吸5秒使腹部隆起，缓呼5秒，重复5次', icon: '💨', completed: false, category: 'breath' },
-  { id: 's1', title: '提前30分钟上床', desc: '今晚比平时早30分钟躺下，不带手机', icon: '🌙', completed: false, category: 'sleep' },
-  { id: 's2', title: '睡前远离屏幕', desc: '睡前1小时不刷手机，可以听轻音乐或阅读纸质书', icon: '📵', completed: false, category: 'sleep' },
-  { id: 'a1', title: '散步15分钟', desc: '出门走走，感受周围的环境，不用有目的地', icon: '🚶', completed: false, category: 'activity' },
-  { id: 'a2', title: '写3件感恩的事', desc: '找一张纸写下今天值得感恩的3件小事', icon: '✏️', completed: false, category: 'activity' },
-  { id: 'a3', title: '喝一杯温水', desc: '现在就去倒一杯温水，慢慢喝完', icon: '💧', completed: false, category: 'activity' },
-  { id: 'c1', title: '联系一个朋友', desc: '给一位信任的朋友发条消息或打个电话', icon: '💬', completed: false, category: 'social' },
-  { id: 'm1', title: '5分钟正念冥想', desc: '闭上眼睛专注呼吸，觉察当下的感受，不评判', icon: '🧘', completed: false, category: 'mindfulness' },
-  { id: 'm2', title: '身体扫描练习', desc: '从头顶到脚趾逐一感受身体各部位的紧张与放松', icon: '🔍', completed: false, category: 'mindfulness' },
-];
+const migrateCopingTasks = (tasks: any[]): CopingTask[] => {
+  if (!tasks || !Array.isArray(tasks)) return [];
+  const today = getToday();
+  if (tasks.length > 0 && tasks[0].forStressTypes && tasks[0].priority !== undefined) {
+    return tasks;
+  }
+  return tasks.map((t, i) => ({
+    id: t.id || `migrated-${i}`,
+    title: t.title || '',
+    desc: t.desc || '',
+    icon: t.icon || '✅',
+    completed: !!t.completed,
+    completedAt: t.completedAt,
+    category: t.category || 'activity',
+    priority: t.priority ?? 3,
+    forStressTypes: t.forStressTypes || ['mixed']
+  }));
+};
 
 const migrateReminders = (old: any): ReminderSettings => {
   if (old && old.items && Array.isArray(old.items)) return old;
@@ -50,7 +57,8 @@ const migrateAppState = (state: any): AppState => {
   return {
     likedPostIds: state?.likedPostIds || [],
     isAdmin: state?.isAdmin || false,
-    copingTasks: state?.copingTasks || defaultCopingTasks
+    copingTasks: migrateCopingTasks(state?.copingTasks),
+    planGeneratedDate: state?.planGeneratedDate
   };
 };
 
@@ -81,7 +89,8 @@ interface DiaryState {
   unlockBadge: (id: string) => void;
   toggleAdminMode: () => void;
   toggleCopingTask: (taskId: string) => void;
-  resetCopingTasks: () => void;
+  regenerateCopingPlan: () => void;
+  ensurePlanUpToDate: () => void;
 }
 
 const getNextReminderTime = (timeStr: string): number => {
@@ -324,19 +333,45 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
 
   toggleCopingTask: (taskId) => {
     const { appState } = get();
-    const newTasks = appState.copingTasks.map(t =>
-      t.id === taskId ? { ...t, completed: !t.completed } : t
-    );
+    const newTasks = appState.copingTasks.map(t => {
+      if (t.id === taskId) {
+        const willComplete = !t.completed;
+        return {
+          ...t,
+          completed: willComplete,
+          completedAt: willComplete ? Date.now() : undefined
+        };
+      }
+      return t;
+    });
     const newAppState = { ...appState, copingTasks: newTasks };
     set({ appState: newAppState });
     setStorage('appState', newAppState);
   },
 
-  resetCopingTasks: () => {
-    const { appState } = get();
-    const newTasks = appState.copingTasks.map(t => ({ ...t, completed: false }));
-    const newAppState = { ...appState, copingTasks: newTasks };
+  regenerateCopingPlan: () => {
+    const { diaries, appState } = get();
+    const today = getToday();
+    const todayDate = new Date(today);
+    const sevenDaysAgo = new Date(todayDate);
+    sevenDaysAgo.setDate(todayDate.getDate() - 6);
+    const sevenDaysAgoStr = formatDate(sevenDaysAgo, 'YYYY-MM-DD');
+
+    const recentDiaries = diaries.filter(d => d.date >= sevenDaysAgoStr && d.date <= today);
+    const { type: stressType } = detectStressType(recentDiaries);
+    const newTasks = generateCopingPlan(stressType);
+    const newAppState = { ...appState, copingTasks: newTasks, planGeneratedDate: today };
     set({ appState: newAppState });
     setStorage('appState', newAppState);
+    console.log('[Coping] 重新生成调适计划:', { stressType, taskCount: newTasks.length });
+  },
+
+  ensurePlanUpToDate: () => {
+    const { appState, regenerateCopingPlan } = get();
+    const today = getToday();
+    if (!appState.planGeneratedDate || appState.planGeneratedDate !== today || appState.copingTasks.length === 0) {
+      console.log('[Coping] 计划已过期或不存在，重新生成');
+      regenerateCopingPlan();
+    }
   }
 }));

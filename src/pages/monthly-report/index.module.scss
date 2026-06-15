@@ -284,3 +284,63 @@
   font-weight: $font-weight-semibold;
   color: $color-primary;
 }
+
+.trendSection {
+}
+
+.trendTable {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: 0 2rpx 12rpx rgba(255, 155, 123, 0.06);
+  overflow-x: auto;
+}
+
+.trendRow {
+  display: flex;
+  align-items: center;
+  padding: $spacing-md 0;
+
+  &:not(:last-child) {
+    border-bottom: 1rpx solid $color-divider;
+  }
+}
+
+.trendLabel {
+  flex: 1;
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+}
+
+.trendMonthCell {
+  flex: 1;
+  text-align: center;
+}
+
+.trendMonthLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.trendMonthValue {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+}
+
+.trendMonthValueCurrent {
+  color: $color-primary;
+}
+
+.trendArrow {
+  font-size: 20rpx;
+  margin-left: 4rpx;
+}
+
+.trendArrowUp {
+  color: #4CAF50;
+}
+
+.trendArrowDown {
+  color: #FF6B6B;
+}

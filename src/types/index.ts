@@ -1,5 +1,7 @@
 export type EmotionType = 'happy' | 'calm' | 'sad' | 'anxious' | 'angry' | 'tired';
 
+export type StressType = 'anxiety' | 'fatigue' | 'low_mood' | 'anger' | 'mixed';
+
 export interface EmotionOption {
   type: EmotionType;
   label: string;
@@ -88,17 +90,23 @@ export interface ReminderSettings {
   items: ReminderItem[];
 }
 
+export type CopingCategory = 'breath' | 'sleep' | 'activity' | 'social' | 'mindfulness';
+
 export interface CopingTask {
   id: string;
   title: string;
   desc: string;
   icon: string;
   completed: boolean;
-  category: 'breath' | 'sleep' | 'activity' | 'social' | 'mindfulness';
+  completedAt?: number;
+  category: CopingCategory;
+  priority: number;
+  forStressTypes: StressType[];
 }
 
 export interface AppState {
   likedPostIds: string[];
   isAdmin: boolean;
   copingTasks: CopingTask[];
+  planGeneratedDate?: string;
 }

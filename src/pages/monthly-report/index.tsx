@@ -24,6 +24,13 @@ const DiffIndicator: React.FC<{ current: number; prev: number; unit?: string }> 
   return <Text className={styles.diffDown}>↓ {diff}{unit}</Text>;
 };
 
+const TrendArrow: React.FC<{ current: number; prev: number }> = ({ current, prev }) => {
+  if (prev === 0 && current === 0) return null;
+  if (current === prev) return <Text className={styles.trendArrow}>→</Text>;
+  if (current > prev) return <Text className={`${styles.trendArrow} ${styles.trendArrowUp}`}>↑</Text>;
+  return <Text className={`${styles.trendArrow} ${styles.trendArrowDown}`}>↓</Text>;
+};
+
 const MonthlyReportPage: React.FC = () => {
   const diaries = useDiaryStore(state => state.diaries);
   const badges = useDiaryStore(state => state.badges);
@@ -42,7 +49,7 @@ const MonthlyReportPage: React.FC = () => {
   const checkInRate = Math.round((totalCheckIns / monthDates.length) * 100);
 
   const prevTotalCheckIns = prevMonthDiaries.length;
-  const prevCheckInRate = Math.round((prevTotalCheckIns / prevMonthDates.length) * 100);
+  const prevCheckInRate = prevMonthDates.length > 0 ? Math.round((prevTotalCheckIns / prevMonthDates.length) * 100) : 0;
 
   const emotionCount: Record<EmotionType, number> = {
     happy: 0, calm: 0, sad: 0, anxious: 0, angry: 0, tired: 0
@@ -110,7 +117,49 @@ const MonthlyReportPage: React.FC = () => {
   const mostCommonEmotionData = getEmotionByType(mostCommonEmotion);
   const prevMostCommonEmotionData = getEmotionByType(prevMostCommonEmotion);
 
-  const hasPrevData = prevTotalCheckIns > 0;
+  const prevMostCommonLabel = prevTotalCheckIns > 0 ? `${prevMostCommonEmotionData.emoji} ${prevMostCommonEmotionData.label}` : '无数据';
+
+  const getMonthLabel = (m: string): string => {
+    const parts = m.split('-');
+    return `${parseInt(parts[1], 10)}月`;
+  };
+
+  const getMonthStats = (targetMonth: string) => {
+    const targetDiaries = diaries.filter(d => d.date.startsWith(targetMonth));
+    const checkIns = targetDiaries.length;
+    let monthScore = 0;
+    let highNegativeDays = 0;
+    targetDiaries.forEach(d => {
+      monthScore += getEmotionScore(d.emotion);
+      const isNegative = getEmotionByType(d.emotion).isNegative;
+      if (isNegative && (d.intensity ?? 5) >= 7) {
+        highNegativeDays++;
+      }
+    });
+    const avgScore = checkIns > 0 ? parseFloat((monthScore / checkIns).toFixed(1)) : 0;
+
+    const targetPosts = posts.filter(p => {
+      const postMonth = new Date(p.createdAt).toISOString().slice(0, 7);
+      return postMonth === targetMonth;
+    });
+    const communityInteractions = targetPosts.reduce((sum, p) => sum + p.likes + p.comments, 0);
+
+    return {
+      checkIns,
+      avgScore,
+      highNegativeDays,
+      communityInteractions
+    };
+  };
+
+  const month2 = getPrevMonth(month);
+  const month3 = getPrevMonth(month2);
+  const trendMonths = [month3, month2, month];
+  const trendData = trendMonths.map(m => ({
+    month: m,
+    label: getMonthLabel(m),
+    stats: getMonthStats(m)
+  }));
 
   const getMoodSummary = () => {
     const score = parseFloat(avgScore);
@@ -224,7 +273,7 @@ const MonthlyReportPage: React.FC = () => {
           <View className={styles.summaryEmoji}>{mostCommonEmotionData.emoji}</View>
           <Text className={styles.summaryMood}>本月主打情绪：{mostCommonEmotionData.label}</Text>
           <Text className={styles.summaryText}>{getMoodSummary()}</Text>
-          {hasPrevData && mostCommonEmotion !== prevMostCommonEmotion && (
+          {prevTotalCheckIns > 0 && mostCommonEmotion !== prevMostCommonEmotion && (
             <Text className={styles.summaryChange}>
               上月主打情绪：{prevMostCommonEmotionData.emoji} {prevMostCommonEmotionData.label}
             </Text>
@@ -235,17 +284,17 @@ const MonthlyReportPage: React.FC = () => {
           <View className={styles.statCard}>
             <Text className={styles.statNum}>{totalCheckIns}</Text>
             <Text className={styles.statLabel}>打卡天数</Text>
-            {hasPrevData && <DiffIndicator current={totalCheckIns} prev={prevTotalCheckIns} unit="天" />}
+            <DiffIndicator current={totalCheckIns} prev={prevTotalCheckIns} unit="天" />
           </View>
           <View className={styles.statCard}>
             <Text className={styles.statNum}>{checkInRate}%</Text>
             <Text className={styles.statLabel}>打卡率</Text>
-            {hasPrevData && <DiffIndicator current={checkInRate} prev={prevCheckInRate} unit="%" />}
+            <DiffIndicator current={checkInRate} prev={prevCheckInRate} unit="%" />
           </View>
           <View className={styles.statCard}>
             <Text className={styles.statNum}>{avgScore}</Text>
             <Text className={styles.statLabel}>情绪指数</Text>
-            {hasPrevData && <DiffIndicator current={parseFloat(avgScore)} prev={parseFloat(prevAvgScore)} />}
+            <DiffIndicator current={parseFloat(avgScore)} prev={parseFloat(prevAvgScore)} />
           </View>
         </View>
 
@@ -256,48 +305,104 @@ const MonthlyReportPage: React.FC = () => {
           </View>
         </View>
 
-        {hasPrevData && (
-          <View className={styles.section}>
-            <Text className={styles.sectionTitle}>📊 与上月对比</Text>
-            <View className={styles.card}>
-              <View className={styles.compareRow}>
-                <Text className={styles.compareLabel}>打卡天数</Text>
-                <View className={styles.compareValues}>
-                  <Text className={styles.comparePrev}>{prevTotalCheckIns}天</Text>
-                  <Text className={styles.compareArrow}>→</Text>
-                  <Text className={styles.compareCurrent}>{totalCheckIns}天</Text>
-                  <DiffIndicator current={totalCheckIns} prev={prevTotalCheckIns} unit="天" />
-                </View>
+        <View className={styles.section}>
+          <Text className={styles.sectionTitle}>📊 与上月对比</Text>
+          <View className={styles.card}>
+            <View className={styles.compareRow}>
+              <Text className={styles.compareLabel}>打卡天数</Text>
+              <View className={styles.compareValues}>
+                <Text className={styles.comparePrev}>{prevTotalCheckIns}天</Text>
+                <Text className={styles.compareArrow}>→</Text>
+                <Text className={styles.compareCurrent}>{totalCheckIns}天</Text>
+                <DiffIndicator current={totalCheckIns} prev={prevTotalCheckIns} unit="天" />
               </View>
-              <View className={styles.compareRow}>
-                <Text className={styles.compareLabel}>主打情绪</Text>
-                <View className={styles.compareValues}>
-                  <Text className={styles.comparePrev}>{prevMostCommonEmotionData.emoji} {prevMostCommonEmotionData.label}</Text>
-                  <Text className={styles.compareArrow}>→</Text>
-                  <Text className={styles.compareCurrent}>{mostCommonEmotionData.emoji} {mostCommonEmotionData.label}</Text>
-                </View>
+            </View>
+            <View className={styles.compareRow}>
+              <Text className={styles.compareLabel}>主打情绪</Text>
+              <View className={styles.compareValues}>
+                <Text className={styles.comparePrev}>{prevMostCommonLabel}</Text>
+                <Text className={styles.compareArrow}>→</Text>
+                <Text className={styles.compareCurrent}>{mostCommonEmotionData.emoji} {mostCommonEmotionData.label}</Text>
               </View>
-              <View className={styles.compareRow}>
-                <Text className={styles.compareLabel}>情绪指数</Text>
-                <View className={styles.compareValues}>
-                  <Text className={styles.comparePrev}>{prevAvgScore}</Text>
-                  <Text className={styles.compareArrow}>→</Text>
-                  <Text className={styles.compareCurrent}>{avgScore}</Text>
-                  <DiffIndicator current={parseFloat(avgScore)} prev={parseFloat(prevAvgScore)} />
-                </View>
+            </View>
+            <View className={styles.compareRow}>
+              <Text className={styles.compareLabel}>情绪指数</Text>
+              <View className={styles.compareValues}>
+                <Text className={styles.comparePrev}>{prevAvgScore}</Text>
+                <Text className={styles.compareArrow}>→</Text>
+                <Text className={styles.compareCurrent}>{avgScore}</Text>
+                <DiffIndicator current={parseFloat(avgScore)} prev={parseFloat(prevAvgScore)} />
               </View>
-              <View className={styles.compareRow}>
-                <Text className={styles.compareLabel}>社区互动</Text>
-                <View className={styles.compareValues}>
-                  <Text className={styles.comparePrev}>{prevTotalLikes + prevTotalComments}次</Text>
-                  <Text className={styles.compareArrow}>→</Text>
-                  <Text className={styles.compareCurrent}>{totalLikes + totalComments}次</Text>
-                  <DiffIndicator current={totalLikes + totalComments} prev={prevTotalLikes + prevTotalComments} unit="次" />
-                </View>
+            </View>
+            <View className={styles.compareRow}>
+              <Text className={styles.compareLabel}>社区互动</Text>
+              <View className={styles.compareValues}>
+                <Text className={styles.comparePrev}>{prevTotalLikes + prevTotalComments}次</Text>
+                <Text className={styles.compareArrow}>→</Text>
+                <Text className={styles.compareCurrent}>{totalLikes + totalComments}次</Text>
+                <DiffIndicator current={totalLikes + totalComments} prev={prevTotalLikes + prevTotalComments} unit="次" />
               </View>
             </View>
           </View>
-        )}
+        </View>
+
+        <View className={`${styles.section} ${styles.trendSection}`}>
+          <Text className={styles.sectionTitle}>📊 近3个月趋势</Text>
+          <View className={styles.trendTable}>
+            <View className={styles.trendRow}>
+              <Text className={styles.trendLabel}></Text>
+              {trendData.map((t, i) => (
+                <View key={t.month} className={styles.trendMonthCell}>
+                  <Text className={styles.trendMonthLabel}>{t.label}</Text>
+                </View>
+              ))}
+            </View>
+            <View className={styles.trendRow}>
+              <Text className={styles.trendLabel}>打卡天数</Text>
+              {trendData.map((t, i) => (
+                <View key={t.month} className={styles.trendMonthCell}>
+                  <Text className={`${styles.trendMonthValue} ${i === trendData.length - 1 ? styles.trendMonthValueCurrent : ''}`}>
+                    {t.stats.checkIns}
+                  </Text>
+                  {i > 0 && <TrendArrow current={t.stats.checkIns} prev={trendData[i - 1].stats.checkIns} />}
+                </View>
+              ))}
+            </View>
+            <View className={styles.trendRow}>
+              <Text className={styles.trendLabel}>平均情绪指数</Text>
+              {trendData.map((t, i) => (
+                <View key={t.month} className={styles.trendMonthCell}>
+                  <Text className={`${styles.trendMonthValue} ${i === trendData.length - 1 ? styles.trendMonthValueCurrent : ''}`}>
+                    {t.stats.avgScore.toFixed(1)}
+                  </Text>
+                  {i > 0 && <TrendArrow current={t.stats.avgScore} prev={trendData[i - 1].stats.avgScore} />}
+                </View>
+              ))}
+            </View>
+            <View className={styles.trendRow}>
+              <Text className={styles.trendLabel}>高强度负面天数</Text>
+              {trendData.map((t, i) => (
+                <View key={t.month} className={styles.trendMonthCell}>
+                  <Text className={`${styles.trendMonthValue} ${i === trendData.length - 1 ? styles.trendMonthValueCurrent : ''}`}>
+                    {t.stats.highNegativeDays}
+                  </Text>
+                  {i > 0 && <TrendArrow current={t.stats.highNegativeDays} prev={trendData[i - 1].stats.highNegativeDays} />}
+                </View>
+              ))}
+            </View>
+            <View className={styles.trendRow}>
+              <Text className={styles.trendLabel}>社区互动</Text>
+              {trendData.map((t, i) => (
+                <View key={t.month} className={styles.trendMonthCell}>
+                  <Text className={`${styles.trendMonthValue} ${i === trendData.length - 1 ? styles.trendMonthValueCurrent : ''}`}>
+                    {t.stats.communityInteractions}
+                  </Text>
+                  {i > 0 && <TrendArrow current={t.stats.communityInteractions} prev={trendData[i - 1].stats.communityInteractions} />}
+                </View>
+              ))}
+            </View>
+          </View>
+        </View>
 
         <View className={styles.section}>
           <Text className={styles.sectionTitle}>打卡日历</Text>
