@@ -49,11 +49,13 @@ const AnalysisPage: React.FC = () => {
   const allContent = diaries.filter(d => weekDates.includes(d.date)).map(d => d.content);
   const keywords = extractKeywords(allContent);
 
-  const chartData = weekDiariesWithData.map(d => ({
+  const lineChartData = actualWeekDiaries.map(d => ({
     date: d.date,
-    emotion: d.hasRecord ? d.emotion : 'calm' as EmotionType,
+    emotion: d.emotion,
     score: d.score
   }));
+
+  console.log('[Analysis] 折线图数据（仅实际打卡）:', lineChartData.map(d => ({ date: d.date, score: d.score })));
 
   const actualEmotionRecords = actualWeekDiaries.map(d => ({
     date: d.date,
@@ -141,7 +143,7 @@ const AnalysisPage: React.FC = () => {
         <Text className={styles.sectionTitle}>情绪变化趋势</Text>
         <View className={styles.card}>
           {checkInDays > 0 ? (
-            <EmotionLineChart data={chartData} />
+            <EmotionLineChart data={lineChartData} />
           ) : (
             <View className={styles.emptyTip}>
               <Text className={styles.emptyText}>开始打卡后就能看到情绪变化啦</Text>

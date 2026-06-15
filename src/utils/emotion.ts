@@ -28,18 +28,58 @@ export const getEmotionScore = (type: EmotionType): number => {
 export const analyzeNegativeEmotions = (
   emotions: { date: string; emotion: EmotionType }[],
   threshold: number = 0.6
-): { triggered: boolean; days: number; ratio: number } => {
-  if (emotions.length < 3) return { triggered: false, days: emotions.length, ratio: 0 };
+): { triggered: boolean; days: number; ratio: number; consecutiveDays: { date: string; emotion: EmotionType }[] } => {
+  if (emotions.length < 3) return { triggered: false, days: emotions.length, ratio: 0, consecutiveDays: [] };
 
-  const last3 = emotions.slice(-3);
-  const negativeCount = last3.filter(e => getEmotionByType(e.emotion).isNegative).length;
-  const ratio = negativeCount / 3;
+  const sortedByDate = [...emotions].sort((a, b) => a.date.localeCompare(b.date));
 
-  return {
-    triggered: ratio >= threshold,
-    days: 3,
-    ratio
-  };
+  console.log('[Analysis] 检查连续3天预警，已排序记录:', sortedByDate.map(e => ({ date: e.date, emotion: e.emotion })));
+
+  for (let i = 0; i <= sortedByDate.length - 3; i++) {
+    const day1 = sortedByDate[i];
+    const day2 = sortedByDate[i + 1];
+    const day3 = sortedByDate[i + 2];
+
+    const date1 = new Date(day1.date);
+    const date2 = new Date(day2.date);
+    const date3 = new Date(day3.date);
+
+    const diff1 = (date2.getTime() - date1.getTime()) / (1000 * 60 * 60 * 24);
+    const diff2 = (date3.getTime() - date2.getTime()) / (1000 * 60 * 60 * 24);
+
+    console.log('[Analysis] 检查连续3天:', {
+      days: [day1.date, day2.date, day3.date],
+      diff1,
+      diff2,
+      isConsecutive: diff1 === 1 && diff2 === 1
+    });
+
+    if (diff1 === 1 && diff2 === 1) {
+      const negativeCount = [day1, day2, day3].filter(e => getEmotionByType(e.emotion).isNegative).length;
+      const ratio = negativeCount / 3;
+
+      console.log('[Analysis] 找到连续3天记录:', {
+        dates: [day1.date, day2.date, day3.date],
+        emotions: [day1.emotion, day2.emotion, day3.emotion],
+        negativeCount,
+        ratio: (ratio * 100).toFixed(1) + '%',
+        threshold: (threshold * 100) + '%',
+        triggered: ratio >= threshold
+      });
+
+      if (ratio >= threshold) {
+        return {
+          triggered: true,
+          days: 3,
+          ratio,
+          consecutiveDays: [day1, day2, day3]
+        };
+      }
+    }
+  }
+
+  console.log('[Analysis] 未找到符合条件的连续3天记录');
+  return { triggered: false, days: 3, ratio: 0, consecutiveDays: [] };
 };
 
 export const extractKeywords = (texts: string[]): { word: string; count: number }[] => {

@@ -218,10 +218,21 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
 
   checkAndTriggerReminder: () => {
     const { reminder, hasCheckedInToday, scheduleNextReminder } = get();
-    if (!reminder.enabled) return;
+    if (!reminder.enabled) {
+      console.log('[Reminder] 提醒已关闭，跳过触发');
+      return;
+    }
+
+    const now = Date.now();
+    console.log('[Reminder] 检查触发条件:', {
+      now: formatDate(now, 'YYYY-MM-DD HH:mm:ss'),
+      scheduled: reminder.nextTriggerAt ? formatDate(reminder.nextTriggerAt, 'YYYY-MM-DD HH:mm:ss') : 'none',
+      enabled: reminder.enabled,
+      hasCheckedInToday: hasCheckedInToday()
+    });
 
     if (!hasCheckedInToday()) {
-      console.log('[Reminder] 触发打卡提醒!');
+      console.log('[Reminder] ✅ 触发打卡提醒弹窗!');
       Taro.showModal({
         title: '📝 今日心情记录',
         content: '今天还没记录心情哦，来记录一下吧~',
@@ -233,6 +244,7 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
           }
         }
       });
+      Taro.vibrateShort({ type: 'medium' }).catch(() => {});
     } else {
       console.log('[Reminder] 今日已打卡，跳过提醒');
     }
@@ -243,6 +255,7 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
     };
     set({ reminder: newSettings });
     setStorage('reminder', newSettings);
+    console.log('[Reminder] 已调度下一次提醒:', formatDate(newSettings.nextTriggerAt!, 'YYYY-MM-DD HH:mm'));
     scheduleNextReminder();
   },
 

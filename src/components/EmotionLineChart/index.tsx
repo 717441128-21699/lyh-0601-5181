@@ -12,19 +12,46 @@ const EmotionLineChart: React.FC<EmotionLineChartProps> = ({ data }) => {
   const maxScore = 5;
   const chartHeight = 200;
   const chartWidth = 600;
+  const padding = 30;
 
-  const points = data.map((d, i) => {
-    const x = (i / Math.max(data.length - 1, 1)) * chartWidth;
-    const y = chartHeight - (d.score / maxScore) * chartHeight;
+  console.log('[LineChart] 收到数据:', data);
+
+  if (data.length === 0) {
+    return (
+      <View className={styles.container}>
+        <View className={styles.empty}>
+          <Text className={styles.emptyText}>暂无数据</Text>
+        </View>
+      </View>
+    );
+  }
+
+  const sortedData = [...data].sort((a, b) => a.date.localeCompare(b.date));
+
+  const minDate = new Date(sortedData[0].date);
+  const maxDate = new Date(sortedData[sortedData.length - 1].date);
+  const totalDays = Math.max(1, (maxDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24));
+
+  const points = sortedData.map((d) => {
+    const daysFromStart = (new Date(d.date).getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24);
+    const x = padding + (daysFromStart / totalDays) * (chartWidth - 2 * padding);
+    const y = chartHeight - padding - ((d.score - 1) / (maxScore - 1)) * (chartHeight - 2 * padding);
     const emotion = getEmotionByType(d.emotion);
-    return { x, y, ...d, emotion };
+    return { x, y, ...d, emotion, daysFromStart };
   });
+
+  console.log('[LineChart] 计算后点坐标:', points.map(p => ({ date: p.date, x: p.x.toFixed(1), y: p.y.toFixed(1), score: p.score })));
 
   const pathD = points.map((p, i) => {
     return `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`;
   }).join(' ');
 
-  const weekLabels = ['一', '二', '三', '四', '五', '六', '日'];
+  const getDayLabel = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const day = date.getDate();
+    const weekDay = ['日', '一', '二', '三', '四', '五', '六'][date.getDay()];
+    return { day, weekDay };
+  };
 
   return (
     <View className={styles.container}>
@@ -49,14 +76,16 @@ const EmotionLineChart: React.FC<EmotionLineChartProps> = ({ data }) => {
                 <stop offset="100%" stopColor="#FFD93D" />
               </linearGradient>
             </defs>
-            <path
-              d={pathD}
-              fill="none"
-              stroke="url(#lineGradient)"
-              strokeWidth="4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
+            {points.length > 1 && (
+              <path
+                d={pathD}
+                fill="none"
+                stroke="url(#lineGradient)"
+                strokeWidth="4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            )}
             {points.map((p, i) => (
               <g key={i}>
                 <circle cx={p.x} cy={p.y} r="10" fill={p.emotion.color} stroke="#fff" strokeWidth="3" />
@@ -66,14 +95,16 @@ const EmotionLineChart: React.FC<EmotionLineChartProps> = ({ data }) => {
         </View>
       </View>
       <View className={styles.xAxis}>
-        {weekLabels.map((label, i) => (
-          <View key={i} className={styles.xTick}>
-            <Text className={styles.xLabel}>周{label}</Text>
-            {points[i] && (
-              <Text className={styles.xEmoji}>{points[i].emotion.emoji}</Text>
-            )}
-          </View>
-        ))}
+        {points.map((p, i) => {
+          const { day, weekDay } = getDayLabel(p.date);
+          return (
+            <View key={i} className={styles.xTick}>
+              <Text className={styles.xLabel}>{day}日</Text>
+              <Text className={styles.xLabel}>周{weekDay}</Text>
+              <Text className={styles.xEmoji}>{p.emotion.emoji}</Text>
+            </View>
+          );
+        })}
       </View>
     </View>
   );
