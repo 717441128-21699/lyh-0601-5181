@@ -1,0 +1,76 @@
+@use '@/styles/variables.scss' as *;
+
+.card {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: 0 2rpx 16rpx rgba(255, 155, 123, 0.08);
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+.emotionWrapper {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: $radius-round;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: $spacing-md;
+}
+
+.emoji {
+  font-size: 40rpx;
+}
+
+.info {
+  flex: 1;
+}
+
+.date {
+  display: block;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  margin-bottom: 4rpx;
+}
+
+.emotionLabel {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+}
+
+.content {
+  display: block;
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  line-height: $line-height-loose;
+  margin-bottom: $spacing-md;
+  @include text-ellipsis-multi(3);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.tag {
+  background: $color-bg-tag;
+  border-radius: $radius-sm;
+  padding: 6rpx $spacing-md;
+}
+
+.tagText {
+  font-size: $font-size-xs;
+  color: $color-primary;
+}

@@ -1,0 +1,73 @@
+@use '@/styles/variables.scss' as *;
+
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-md;
+  justify-content: space-between;
+}
+
+.emotionItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-lg $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  border: 2rpx solid transparent;
+  transition: all $transition-base;
+  width: calc(33.33% - 16rpx);
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.96);
+  }
+}
+
+.selected {
+  background: $color-bg-tag !important;
+}
+
+.emoji {
+  font-size: 56rpx;
+  line-height: 1;
+  margin-bottom: $spacing-sm;
+}
+
+.label {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.size-sm {
+  padding: $spacing-md $spacing-sm;
+  width: calc(33.33% - 12rpx);
+
+  .emoji {
+    font-size: 40rpx;
+    margin-bottom: $spacing-xs;
+  }
+
+  .label {
+    font-size: $font-size-xs;
+  }
+}
+
+.size-md {
+  // default
+}
+
+.size-lg {
+  padding: $spacing-xl $spacing-lg;
+  width: calc(33.33% - 20rpx);
+
+  .emoji {
+    font-size: 72rpx;
+    margin-bottom: $spacing-md;
+  }
+
+  .label {
+    font-size: $font-size-md;
+  }
+}

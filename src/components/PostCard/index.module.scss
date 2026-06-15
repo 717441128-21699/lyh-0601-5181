@@ -1,0 +1,119 @@
+@use '@/styles/variables.scss' as *;
+
+.card {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: 0 2rpx 16rpx rgba(255, 155, 123, 0.08);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+}
+
+.avatar {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: $radius-round;
+  background: linear-gradient(135deg, $color-primary-light 0%, $color-primary 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: $spacing-sm;
+}
+
+.avatarText {
+  color: $color-text-white;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+}
+
+.userMeta {
+  display: flex;
+  flex-direction: column;
+}
+
+.nickname {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  margin-bottom: 2rpx;
+}
+
+.time {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.emotionTag {
+  display: flex;
+  align-items: center;
+  padding: 6rpx $spacing-md;
+  border-radius: $radius-round;
+}
+
+.emotionEmoji {
+  font-size: 28rpx;
+  margin-right: 6rpx;
+}
+
+.emotionText {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+}
+
+.content {
+  display: block;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  line-height: $line-height-loose;
+  margin-bottom: $spacing-lg;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  padding-top: $spacing-md;
+  border-top: 1rpx solid $color-divider;
+}
+
+.action {
+  display: flex;
+  align-items: center;
+  margin-right: $spacing-xl;
+
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.actionIcon {
+  font-size: 32rpx;
+  margin-right: $spacing-xs;
+}
+
+.actionCount {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.actionReport {
+  margin-left: auto;
+  padding: $spacing-xs $spacing-md;
+  border-radius: $radius-sm;
+  background: $color-bg-hover;
+}
+
+.actionReportText {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}

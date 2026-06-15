@@ -1,0 +1,65 @@
+@use '@/styles/variables.scss' as *;
+
+.badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-md;
+  background: linear-gradient(135deg, $color-primary-light 0%, $color-primary 100%);
+  border-radius: $radius-lg;
+  transition: all $transition-base;
+}
+
+.locked {
+  background: $color-bg-hover;
+
+  .icon, .name {
+    opacity: 0.4;
+    filter: grayscale(1);
+  }
+}
+
+.icon {
+  font-size: 48rpx;
+  margin-bottom: $spacing-xs;
+}
+
+.name {
+  font-size: $font-size-xs;
+  color: $color-text-white;
+  font-weight: $font-weight-medium;
+}
+
+.size-sm {
+  padding: $spacing-sm;
+
+  .icon {
+    font-size: 36rpx;
+  }
+
+  .name {
+    font-size: 20rpx;
+  }
+}
+
+.size-md {
+  // default
+}
+
+.size-lg {
+  padding: $spacing-lg;
+
+  .icon {
+    font-size: 64rpx;
+    margin-bottom: $spacing-sm;
+  }
+
+  .name {
+    font-size: $font-size-sm;
+  }
+}
+
+.locked .name {
+  color: $color-text-tertiary;
+}

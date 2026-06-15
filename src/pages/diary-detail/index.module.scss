@@ -1,0 +1,97 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $spacing-xl * 2 $page-padding;
+}
+
+.emoji {
+  font-size: 96rpx;
+  margin-bottom: $spacing-md;
+}
+
+.emotionLabel {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  margin-bottom: $spacing-xs;
+}
+
+.date {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.contentCard {
+  margin: $spacing-md $page-padding;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-xl;
+  box-shadow: 0 2rpx 16rpx rgba(255, 155, 123, 0.06);
+}
+
+.content {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  line-height: $line-height-loose;
+}
+
+.imagesSection,
+.tagsSection {
+  margin: $spacing-md $page-padding;
+}
+
+.sectionTitle {
+  display: block;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.imagesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-sm;
+}
+
+.image {
+  width: 100%;
+  height: 220rpx;
+  border-radius: $radius-md;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.tag {
+  background: $color-bg-tag;
+  border-radius: $radius-sm;
+  padding: $spacing-xs $spacing-md;
+}
+
+.tagText {
+  font-size: $font-size-sm;
+  color: $color-primary;
+}
+
+.emptyPage {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptyText {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+}

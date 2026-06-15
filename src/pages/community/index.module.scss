@@ -1,0 +1,158 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: $color-bg-page;
+}
+
+.header {
+  padding: $spacing-xl $page-padding $spacing-lg;
+  background: $color-bg-page;
+}
+
+.title {
+  display: block;
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.subtitle {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.tabs {
+  display: flex;
+  padding: 0 $page-padding;
+  margin-bottom: $spacing-md;
+  gap: $spacing-md;
+}
+
+.tab {
+  padding: $spacing-sm $spacing-lg;
+  border-radius: $radius-button;
+  background: $color-bg-card;
+  transition: all $transition-base;
+}
+
+.tabActive {
+  background: $color-primary;
+
+  .tabText {
+    color: $color-text-white;
+  }
+}
+
+.tabText {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-secondary;
+}
+
+.scrollArea {
+  flex: 1;
+  padding: 0 $page-padding;
+}
+
+.filterArea {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.filterChip {
+  display: inline-flex;
+  align-items: center;
+  padding: $spacing-xs $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-round;
+  margin-right: $spacing-sm;
+  flex-shrink: 0;
+  transition: all $transition-base;
+}
+
+.filterChipActive {
+  background: $color-primary;
+
+  .filterLabel {
+    color: $color-text-white;
+  }
+}
+
+.filterEmoji {
+  font-size: 24rpx;
+  margin-right: 6rpx;
+}
+
+.filterLabel {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+}
+
+.postsList {
+  padding-bottom: $spacing-xl;
+}
+
+.empty {
+  padding: $spacing-xl * 2 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.emptyEmoji {
+  font-size: 80rpx;
+  margin-bottom: $spacing-md;
+}
+
+.emptyText {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+  margin-bottom: $spacing-xs;
+}
+
+.emptyDesc {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.fabWrapper {
+  position: fixed;
+  right: $page-padding;
+  bottom: 140rpx;
+  z-index: 100;
+}
+
+.fabBtn {
+  @include button-reset;
+  height: 96rpx;
+  padding: 0 $spacing-xl;
+  background: linear-gradient(135deg, $color-primary-light 0%, $color-primary 100%);
+  border-radius: $radius-button;
+  box-shadow: 0 8rpx 24rpx rgba(255, 155, 123, 0.4);
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.fabIcon {
+  font-size: 36rpx;
+}
+
+.fabText {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-white;
+}

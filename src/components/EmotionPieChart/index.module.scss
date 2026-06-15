@@ -1,0 +1,92 @@
+@use '@/styles/variables.scss' as *;
+
+.container {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xl;
+}
+
+.chartWrapper {
+  flex-shrink: 0;
+}
+
+.pieChart {
+  width: 240rpx;
+  height: 240rpx;
+  border-radius: $radius-round;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.innerCircle {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: $radius-round;
+  background: $color-bg-card;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.totalLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-bottom: 4rpx;
+}
+
+.totalValue {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+}
+
+.legend {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+}
+
+.legendColor {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: $radius-xs;
+  margin-right: $spacing-sm;
+}
+
+.legendEmoji {
+  font-size: 28rpx;
+  margin-right: $spacing-xs;
+}
+
+.legendLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-right: $spacing-sm;
+}
+
+.legendValue {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  margin-left: auto;
+}
+
+.empty {
+  padding: $spacing-xl;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptyText {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+}

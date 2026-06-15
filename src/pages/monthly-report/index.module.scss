@@ -1,0 +1,213 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  padding: 0 $page-padding;
+  padding-bottom: 200rpx;
+}
+
+.header {
+  padding: $spacing-xl 0;
+  text-align: center;
+}
+
+.title {
+  display: block;
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.month {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+}
+
+.summaryCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(135deg, $color-primary-light 0%, $color-primary 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-xl;
+  margin-bottom: $spacing-md;
+}
+
+.summaryEmoji {
+  font-size: 80rpx;
+  margin-bottom: $spacing-md;
+}
+
+.summaryMood {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-white;
+  margin-bottom: $spacing-xs;
+}
+
+.summaryText {
+  font-size: $font-size-sm;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+}
+
+.statsRow {
+  display: flex;
+  gap: $spacing-md;
+  margin-bottom: $spacing-md;
+}
+
+.statCard {
+  flex: 1;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg $spacing-md;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 2rpx 12rpx rgba(255, 155, 123, 0.06);
+}
+
+.statNum {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  margin-bottom: 4rpx;
+}
+
+.statLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.section {
+  margin-bottom: $spacing-md;
+}
+
+.sectionTitle {
+  display: block;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.card {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: 0 2rpx 12rpx rgba(255, 155, 123, 0.06);
+}
+
+.emotionRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: $spacing-md;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.emotionInfo {
+  display: flex;
+  align-items: center;
+  width: 120rpx;
+}
+
+.emotionEmoji {
+  font-size: 32rpx;
+  margin-right: $spacing-xs;
+}
+
+.emotionName {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.emotionBar {
+  flex: 1;
+  height: 16rpx;
+  background: $color-bg-hover;
+  border-radius: $radius-round;
+  margin: 0 $spacing-md;
+  overflow: hidden;
+}
+
+.emotionFill {
+  height: 100%;
+  border-radius: $radius-round;
+  transition: width 0.3s ease;
+}
+
+.emotionPercent {
+  width: 80rpx;
+  text-align: right;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+}
+
+.keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-md;
+  align-items: center;
+  justify-content: center;
+  min-height: 120rpx;
+}
+
+.keyword {
+  padding: $spacing-xs $spacing-sm;
+  font-weight: $font-weight-medium;
+}
+
+.interactRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.interactLabel {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+}
+
+.interactValue {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+}
+
+.badgesRow {
+  display: flex;
+  gap: $spacing-md;
+  flex-wrap: wrap;
+}
+
+.footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: $spacing-md $page-padding;
+  padding-bottom: calc($spacing-md + env(safe-area-inset-bottom));
+  background: $color-bg-page;
+  border-top: 1rpx solid $color-divider;
+}
+
+.exportBtn {
+  @include button-reset;
+  height: $button-height-lg;
+  width: 100%;
+  background: linear-gradient(135deg, $color-primary-light 0%, $color-primary 100%);
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  border-radius: $radius-button;
+
+  &:active {
+    opacity: 0.9;
+  }
+}

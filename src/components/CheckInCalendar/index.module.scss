@@ -1,0 +1,77 @@
+@use '@/styles/variables.scss' as *;
+
+.container {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: $spacing-lg;
+}
+
+.monthText {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.weekRow {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: $spacing-sm;
+}
+
+.weekCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xs 0;
+}
+
+.weekText {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: $spacing-xs;
+}
+
+.cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-sm 0;
+  border-radius: $radius-md;
+  min-height: 72rpx;
+}
+
+.cellEmpty {
+  // empty placeholder
+}
+
+.cellToday {
+  background: $color-primary;
+
+  .dateText {
+    color: $color-text-white;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.dateText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: 2rpx;
+}
+
+.emoji {
+  font-size: 24rpx;
+}

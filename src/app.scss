@@ -1,0 +1,18 @@
+@use '@/styles/variables.scss' as *;
+
+page {
+  background: $color-bg-page;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  line-height: $line-height-normal;
+  -webkit-font-smoothing: antialiased;
+}
+
+view, text {
+  box-sizing: border-box;
+}
+
+image {
+  display: block;
+}

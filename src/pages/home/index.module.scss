@@ -1,0 +1,211 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  padding: 0 $page-padding;
+  padding-bottom: 120rpx;
+}
+
+.header {
+  padding: $spacing-xl 0 $spacing-lg;
+}
+
+.greeting {
+  display: flex;
+  flex-direction: column;
+}
+
+.greetingText {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.dateText {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.warningCard {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF9B7B 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+}
+
+.warningIcon {
+  font-size: 48rpx;
+  margin-right: $spacing-md;
+}
+
+.warningContent {
+  flex: 1;
+}
+
+.warningTitle {
+  display: block;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-white;
+  margin-bottom: 4rpx;
+}
+
+.warningDesc {
+  font-size: $font-size-xs;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.warningArrow {
+  font-size: 40rpx;
+  color: $color-text-white;
+  opacity: 0.8;
+}
+
+.checkinCard {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, $color-primary-light 0%, $color-primary 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-xl $spacing-lg;
+  margin-bottom: $spacing-md;
+}
+
+.checkinLeft {
+  margin-right: $spacing-xl;
+}
+
+.streakBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 120rpx;
+  height: 120rpx;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: $radius-round;
+}
+
+.streakNum {
+  font-size: 48rpx;
+  font-weight: $font-weight-bold;
+  color: $color-text-white;
+  line-height: 1;
+  margin-bottom: 4rpx;
+}
+
+.streakLabel {
+  font-size: $font-size-xs;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.checkinRight {
+  flex: 1;
+}
+
+.checkinTitle {
+  display: block;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-white;
+  margin-bottom: 4rpx;
+}
+
+.checkinDesc {
+  display: block;
+  font-size: $font-size-xs;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: $spacing-md;
+}
+
+.checkinBtn {
+  @include button-reset;
+  height: $button-height-sm;
+  min-width: 180rpx;
+  padding: 0 $spacing-lg;
+  background: $color-text-white;
+  color: $color-primary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  border-radius: $radius-button;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.96);
+  }
+}
+
+.todayMood {
+  margin-bottom: $spacing-md;
+}
+
+.section {
+  margin-bottom: $spacing-md;
+}
+
+.sectionTitle {
+  display: block;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.moodCard {
+  display: flex;
+  align-items: flex-start;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: 0 2rpx 16rpx rgba(255, 155, 123, 0.08);
+}
+
+.moodEmojiBox {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: $radius-round;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: $spacing-md;
+  flex-shrink: 0;
+}
+
+.moodEmoji {
+  font-size: 40rpx;
+}
+
+.moodInfo {
+  flex: 1;
+  overflow: hidden;
+}
+
+.moodLabel {
+  display: block;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  margin-bottom: $spacing-xs;
+}
+
+.moodContent {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: $line-height-normal;
+  @include text-ellipsis-multi(2);
+}
+
+.emptyCard {
+  padding: $spacing-xl;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+}
+
+.emptyText {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+}

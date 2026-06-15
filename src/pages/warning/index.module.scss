@@ -1,0 +1,178 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  padding: 0 $page-padding;
+  padding-bottom: $spacing-xl * 2;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $spacing-xl * 2 $page-padding;
+  text-align: center;
+}
+
+.headerIcon {
+  font-size: 80rpx;
+  margin-bottom: $spacing-md;
+}
+
+.headerTitle {
+  display: block;
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+}
+
+.headerDesc {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: $line-height-normal;
+}
+
+.crisisCard {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF9B7B 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+}
+
+.crisisIcon {
+  font-size: 48rpx;
+  margin-right: $spacing-md;
+}
+
+.crisisContent {
+  flex: 1;
+}
+
+.crisisTitle {
+  display: block;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-white;
+  margin-bottom: 4rpx;
+}
+
+.crisisDesc {
+  font-size: $font-size-xs;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.crisisArrow {
+  font-size: 40rpx;
+  color: $color-text-white;
+  opacity: 0.8;
+}
+
+.section {
+  margin-bottom: $spacing-md;
+}
+
+.sectionTitle {
+  display: block;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.suggestionCard {
+  display: flex;
+  align-items: flex-start;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-sm;
+  box-shadow: 0 2rpx 12rpx rgba(255, 155, 123, 0.06);
+}
+
+.suggestionIcon {
+  font-size: 40rpx;
+  margin-right: $spacing-md;
+  flex-shrink: 0;
+}
+
+.suggestionContent {
+  flex: 1;
+}
+
+.suggestionTitle {
+  display: block;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.suggestionDesc {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: $line-height-loose;
+}
+
+.agencyCard {
+  display: flex;
+  align-items: center;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-sm;
+  box-shadow: 0 2rpx 12rpx rgba(255, 155, 123, 0.06);
+}
+
+.agencyInfo {
+  flex: 1;
+}
+
+.agencyName {
+  display: block;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.agencyAddress {
+  display: block;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: 4rpx;
+}
+
+.agencyDistance {
+  font-size: $font-size-xs;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+}
+
+.callBtn {
+  @include button-reset;
+  height: $button-height-sm;
+  padding: 0 $spacing-lg;
+  background: $color-primary;
+  color: $color-text-white;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  border-radius: $radius-button;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.footerTip {
+  padding: $spacing-xl;
+  text-align: center;
+}
+
+.footerTipText {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  line-height: $line-height-loose;
+}

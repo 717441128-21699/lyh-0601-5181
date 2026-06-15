@@ -1,0 +1,110 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  padding: $page-padding;
+  padding-bottom: 200rpx;
+}
+
+.section {
+  margin-bottom: $spacing-xl;
+}
+
+.sectionTitle {
+  display: block;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+  padding-left: $spacing-xs;
+}
+
+.card {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  box-shadow: 0 2rpx 12rpx rgba(255, 155, 123, 0.06);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-lg;
+  border-bottom: 1rpx solid $color-divider;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.rowLeft {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.rowIcon {
+  font-size: 36rpx;
+  margin-right: $spacing-md;
+  width: 56rpx;
+  text-align: center;
+}
+
+.rowLabel {
+  display: block;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  margin-bottom: 2rpx;
+}
+
+.rowDesc {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.timePicker {
+  display: flex;
+  align-items: center;
+  padding: $spacing-xs $spacing-md;
+  background: $color-bg-hover;
+  border-radius: $radius-sm;
+}
+
+.timeText {
+  font-size: $font-size-md;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+  margin-right: $spacing-xs;
+}
+
+.arrow {
+  font-size: 32rpx;
+  color: $color-text-tertiary;
+}
+
+.footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: $spacing-md $page-padding;
+  padding-bottom: calc($spacing-md + env(safe-area-inset-bottom));
+  background: $color-bg-page;
+  border-top: 1rpx solid $color-divider;
+}
+
+.saveBtn {
+  @include button-reset;
+  height: $button-height-lg;
+  width: 100%;
+  background: linear-gradient(135deg, $color-primary-light 0%, $color-primary 100%);
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  border-radius: $radius-button;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
