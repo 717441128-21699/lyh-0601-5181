@@ -9,7 +9,8 @@ export default defineAppConfig({
     'pages/post-create/index',
     'pages/warning/index',
     'pages/settings/index',
-    'pages/monthly-report/index'
+    'pages/monthly-report/index',
+    'pages/admin-review/index'
   ],
   window: {
     backgroundTextStyle: 'light',

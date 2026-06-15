@@ -1,17 +1,25 @@
 import React, { useEffect } from 'react';
 import { useDidShow, useDidHide } from '@tarojs/taro';
-// 全局样式
 import './app.scss';
+import { useDiaryStore } from '@/store/useDiaryStore';
 
 function App(props) {
-  // 可以使用所有的 React Hooks
-  useEffect(() => {});
+  useEffect(() => {
+    console.log('[App] 启动，初始化提醒调度');
+    useDiaryStore.getState().scheduleNextReminder();
+  }, []);
 
-  // 对应 onShow
-  useDidShow(() => {});
+  useDidShow(() => {
+    console.log('[App] 显示，检查提醒状态');
+    const reminder = useDiaryStore.getState().reminder;
+    if (reminder.enabled) {
+      useDiaryStore.getState().scheduleNextReminder();
+    }
+  });
 
-  // 对应 onHide
-  useDidHide(() => {});
+  useDidHide(() => {
+    console.log('[App] 隐藏');
+  });
 
   return props.children;
 }

@@ -18,6 +18,8 @@ export interface DiaryEntry {
   createdAt: number;
 }
 
+export type ReportStatus = 'none' | 'pending' | 'approved' | 'rejected';
+
 export interface CommunityPost {
   id: string;
   content: string;
@@ -26,7 +28,9 @@ export interface CommunityPost {
   comments: number;
   isAnonymous: boolean;
   createdAt: number;
-  isReported: boolean;
+  reportStatus: ReportStatus;
+  reportedAt?: number;
+  reportReason?: string;
 }
 
 export interface CheckInRecord {
@@ -74,4 +78,10 @@ export interface MonthlyReport {
 export interface ReminderSettings {
   enabled: boolean;
   time: string;
+  nextTriggerAt?: number;
+}
+
+export interface AppState {
+  likedPostIds: string[];
+  isAdmin: boolean;
 }

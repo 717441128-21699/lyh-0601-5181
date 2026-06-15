@@ -13,13 +13,18 @@ const CommunityPage: React.FC = () => {
 
   const filteredPosts = posts
     .filter(p => filterEmotion === 'all' || p.emotion === filterEmotion)
-    .filter(p => !p.isReported)
+    .filter(p => p.reportStatus !== 'approved')
     .sort((a, b) => {
       if (activeTab === 'hot') {
-        return (b.likes + b.comments * 2) - (a.likes + a.comments * 2);
+        const scoreA = b.likes + b.comments * 2;
+        const scoreB = a.likes + a.comments * 2;
+        console.log('[Community] 热门排序:', { postA: b.id, scoreA, postB: a.id, scoreB: scoreA - scoreB });
+        return scoreA - scoreB;
       }
       return b.createdAt - a.createdAt;
     });
+
+  console.log('[Community] 渲染帖子列表，数量:', filteredPosts.length, '排序:', activeTab);
 
   const handleCreatePost = () => {
     Taro.navigateTo({ url: '/pages/post-create/index' });

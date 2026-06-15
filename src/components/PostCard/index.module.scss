@@ -1,11 +1,27 @@
 @use '@/styles/variables.scss' as *;
 
 .card {
+  position: relative;
   background: $color-bg-card;
   border-radius: $radius-lg;
   padding: $spacing-lg;
   margin-bottom: $spacing-md;
   box-shadow: 0 2rpx 16rpx rgba(255, 155, 123, 0.08);
+}
+
+.pendingBadge {
+  position: absolute;
+  top: $spacing-sm;
+  right: $spacing-sm;
+  background: rgba(255, 125, 0, 0.15);
+  padding: 4rpx $spacing-sm;
+  border-radius: $radius-sm;
+}
+
+.pendingText {
+  font-size: $font-size-xs;
+  color: $color-warning;
+  font-weight: $font-weight-medium;
 }
 
 .header {

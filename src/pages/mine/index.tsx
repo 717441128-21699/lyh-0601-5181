@@ -13,6 +13,9 @@ const MinePage: React.FC = () => {
   const reminder = useDiaryStore(state => state.reminder);
   const getStreakDays = useDiaryStore(state => state.getStreakDays);
   const posts = useDiaryStore(state => state.posts);
+  const isAdmin = useDiaryStore(state => state.appState.isAdmin);
+  const getPendingReports = useDiaryStore(state => state.getPendingReports);
+  const toggleAdminMode = useDiaryStore(state => state.toggleAdminMode);
 
   const streak = getStreakDays();
   const totalDiaries = diaries.length;
@@ -31,11 +34,42 @@ const MinePage: React.FC = () => {
     Taro.navigateTo({ url: '/pages/warning/index' });
   };
 
+  const pendingCount = getPendingReports().length;
+
+  const handleAdminQuick = () => {
+    if (!isAdmin) {
+      Taro.showModal({
+        title: '管理员登录',
+        editable: true,
+        placeholderText: '请输入密码 (admin123)',
+        success: (res) => {
+          if (res.confirm && res.content === 'admin123') {
+            toggleAdminMode();
+            Taro.showToast({ title: '管理员模式已开启', icon: 'success' });
+          } else if (res.confirm) {
+            Taro.showToast({ title: '密码错误', icon: 'none' });
+          }
+        }
+      });
+    } else {
+      Taro.navigateTo({ url: '/pages/admin-review/index' });
+    }
+  };
+
   const menuItems = [
     { icon: '📅', label: '月度报告', desc: '查看本月综合分析', onClick: handleMonthlyReport },
     { icon: '⏰', label: '提醒设置', desc: reminder.enabled ? `每天 ${reminder.time} 提醒` : '未开启', onClick: handleSettings },
     { icon: '🏥', label: '心理咨询', desc: '附近心理咨询机构', onClick: handleAgencies }
   ];
+
+  if (isAdmin || pendingCount > 0) {
+    menuItems.splice(2, 0, {
+      icon: '📋',
+      label: isAdmin ? '内容审核' : '管理员入口',
+      desc: pendingCount > 0 ? `${pendingCount} 条待审核` : (isAdmin ? '审核举报内容' : '点击进入'),
+      onClick: handleAdminQuick
+    });
+  }
 
   return (
     <ScrollView className={styles.page} scrollY>
