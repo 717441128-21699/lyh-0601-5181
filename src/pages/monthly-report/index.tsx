@@ -11,6 +11,19 @@ import { getCurrentMonth, getMonthDates, formatDate } from '@/utils/date';
 import { getEmotionByType, extractKeywords, getEmotionScore } from '@/utils/emotion';
 import { EmotionType } from '@/types';
 
+const getPrevMonth = (month: string): string => {
+  const [y, m] = month.split('-').map(Number);
+  if (m === 1) return `${y - 1}-12`;
+  return `${y}-${m - 1 < 10 ? '0' + (m - 1) : m - 1}`;
+};
+
+const DiffIndicator: React.FC<{ current: number; prev: number; unit?: string }> = ({ current, prev, unit = '' }) => {
+  const diff = current - prev;
+  if (diff === 0) return <Text className={styles.diffZero}>持平</Text>;
+  if (diff > 0) return <Text className={styles.diffUp}>↑ +{diff}{unit}</Text>;
+  return <Text className={styles.diffDown}>↓ {diff}{unit}</Text>;
+};
+
 const MonthlyReportPage: React.FC = () => {
   const diaries = useDiaryStore(state => state.diaries);
   const badges = useDiaryStore(state => state.badges);
@@ -21,16 +34,25 @@ const MonthlyReportPage: React.FC = () => {
   const monthDates = getMonthDates(month);
   const monthDiaries = diaries.filter(d => d.date.startsWith(month));
 
+  const prevMonth = getPrevMonth(month);
+  const prevMonthDates = getMonthDates(prevMonth);
+  const prevMonthDiaries = diaries.filter(d => d.date.startsWith(prevMonth));
+
   const totalCheckIns = monthDiaries.length;
   const checkInRate = Math.round((totalCheckIns / monthDates.length) * 100);
+
+  const prevTotalCheckIns = prevMonthDiaries.length;
+  const prevCheckInRate = Math.round((prevTotalCheckIns / prevMonthDates.length) * 100);
 
   const emotionCount: Record<EmotionType, number> = {
     happy: 0, calm: 0, sad: 0, anxious: 0, angry: 0, tired: 0
   };
   let totalScore = 0;
+  let totalIntensity = 0;
   monthDiaries.forEach(d => {
     emotionCount[d.emotion] = (emotionCount[d.emotion] || 0) + 1;
     totalScore += getEmotionScore(d.emotion);
+    totalIntensity += (d.intensity ?? 5);
   });
 
   let mostCommonEmotion: EmotionType = 'calm';
@@ -43,12 +65,37 @@ const MonthlyReportPage: React.FC = () => {
   });
 
   const avgScore = totalCheckIns > 0 ? (totalScore / totalCheckIns).toFixed(1) : '0.0';
+  const avgIntensity = totalCheckIns > 0 ? (totalIntensity / totalCheckIns).toFixed(1) : '5.0';
+
+  const prevEmotionCount: Record<EmotionType, number> = {
+    happy: 0, calm: 0, sad: 0, anxious: 0, angry: 0, tired: 0
+  };
+  let prevTotalScore = 0;
+  prevMonthDiaries.forEach(d => {
+    prevEmotionCount[d.emotion] = (prevEmotionCount[d.emotion] || 0) + 1;
+    prevTotalScore += getEmotionScore(d.emotion);
+  });
+
+  let prevMostCommonEmotion: EmotionType = 'calm';
+  let prevMaxCount = 0;
+  (Object.entries(prevEmotionCount) as [EmotionType, number][]).forEach(([type, count]) => {
+    if (count > prevMaxCount) {
+      prevMaxCount = count;
+      prevMostCommonEmotion = type;
+    }
+  });
+
+  const prevAvgScore = prevTotalCheckIns > 0 ? (prevTotalScore / prevTotalCheckIns).toFixed(1) : '0.0';
 
   const keywords = extractKeywords(monthDiaries.map(d => d.content));
 
   const monthPosts = posts.filter(p => {
     const postMonth = new Date(p.createdAt).toISOString().slice(0, 7);
     return postMonth === month;
+  });
+  const prevMonthPosts = posts.filter(p => {
+    const postMonth = new Date(p.createdAt).toISOString().slice(0, 7);
+    return postMonth === prevMonth;
   });
 
   const unlockedThisMonth = badges.filter(b => b.unlocked && b.unlockedAt &&
@@ -57,8 +104,13 @@ const MonthlyReportPage: React.FC = () => {
 
   const totalLikes = monthPosts.reduce((sum, p) => sum + p.likes, 0);
   const totalComments = monthPosts.reduce((sum, p) => sum + p.comments, 0);
+  const prevTotalLikes = prevMonthPosts.reduce((sum, p) => sum + p.likes, 0);
+  const prevTotalComments = prevMonthPosts.reduce((sum, p) => sum + p.comments, 0);
 
   const mostCommonEmotionData = getEmotionByType(mostCommonEmotion);
+  const prevMostCommonEmotionData = getEmotionByType(prevMostCommonEmotion);
+
+  const hasPrevData = prevTotalCheckIns > 0;
 
   const getMoodSummary = () => {
     const score = parseFloat(avgScore);
@@ -73,18 +125,12 @@ const MonthlyReportPage: React.FC = () => {
       Taro.showLoading({ title: '正在生成PDF...', mask: true });
 
       const exportBtn = document.getElementById('export-btn');
-      if (exportBtn) {
-        exportBtn.style.display = 'none';
-      }
+      if (exportBtn) exportBtn.style.display = 'none';
 
       await new Promise(resolve => setTimeout(resolve, 100));
 
       const reportElement = reportRef.current as unknown as HTMLElement;
-      if (!reportElement) {
-        throw new Error('无法获取报告内容');
-      }
-
-      console.log('[PDF] 开始截图，元素高度:', reportElement.scrollHeight);
+      if (!reportElement) throw new Error('无法获取报告内容');
 
       const canvas = await html2canvas(reportElement, {
         scale: 2,
@@ -95,30 +141,18 @@ const MonthlyReportPage: React.FC = () => {
         windowHeight: reportElement.scrollHeight
       });
 
-      if (exportBtn) {
-        exportBtn.style.display = 'block';
-      }
-
-      console.log('[PDF] 截图完成，canvas尺寸:', { width: canvas.width, height: canvas.height });
+      if (exportBtn) exportBtn.style.display = 'block';
 
       const imgData = canvas.toDataURL('image/png');
-
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
       const imgWidth = pageWidth;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-      console.log('[PDF] PDF页面尺寸:', { pageWidth, pageHeight, imgWidth, imgHeight });
-
       let heightLeft = imgHeight;
       let position = 0;
-
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
 
@@ -131,7 +165,6 @@ const MonthlyReportPage: React.FC = () => {
         pageCount++;
       }
 
-      // 页脚
       for (let i = 1; i <= pageCount; i++) {
         pdf.setPage(i);
         pdf.setFontSize(9);
@@ -143,8 +176,6 @@ const MonthlyReportPage: React.FC = () => {
       const url = URL.createObjectURL(pdfOutput);
 
       Taro.hideLoading();
-
-      console.log('[PDF] 生成成功，共', pageCount, '页');
 
       Taro.showModal({
         title: 'PDF生成成功！',
@@ -165,27 +196,19 @@ const MonthlyReportPage: React.FC = () => {
                 title: '打开PDF',
                 content: '在新窗口中打开PDF报告',
                 success: (r) => {
-                  if (r.confirm) {
-                    window.open(url, '_blank');
-                  }
+                  if (r.confirm) window.open(url, '_blank');
                 }
               });
             }
           }
         }
       });
-
     } catch (error) {
       console.error('[PDF] 生成失败:', error);
       Taro.hideLoading();
       const exportBtn = document.getElementById('export-btn');
-      if (exportBtn) {
-        exportBtn.style.display = 'block';
-      }
-      Taro.showToast({
-        title: '生成失败，请重试',
-        icon: 'none'
-      });
+      if (exportBtn) exportBtn.style.display = 'block';
+      Taro.showToast({ title: '生成失败，请重试', icon: 'none' });
     }
   };
 
@@ -201,22 +224,80 @@ const MonthlyReportPage: React.FC = () => {
           <View className={styles.summaryEmoji}>{mostCommonEmotionData.emoji}</View>
           <Text className={styles.summaryMood}>本月主打情绪：{mostCommonEmotionData.label}</Text>
           <Text className={styles.summaryText}>{getMoodSummary()}</Text>
+          {hasPrevData && mostCommonEmotion !== prevMostCommonEmotion && (
+            <Text className={styles.summaryChange}>
+              上月主打情绪：{prevMostCommonEmotionData.emoji} {prevMostCommonEmotionData.label}
+            </Text>
+          )}
         </View>
 
         <View className={styles.statsRow}>
           <View className={styles.statCard}>
             <Text className={styles.statNum}>{totalCheckIns}</Text>
             <Text className={styles.statLabel}>打卡天数</Text>
+            {hasPrevData && <DiffIndicator current={totalCheckIns} prev={prevTotalCheckIns} unit="天" />}
           </View>
           <View className={styles.statCard}>
             <Text className={styles.statNum}>{checkInRate}%</Text>
             <Text className={styles.statLabel}>打卡率</Text>
+            {hasPrevData && <DiffIndicator current={checkInRate} prev={prevCheckInRate} unit="%" />}
           </View>
           <View className={styles.statCard}>
             <Text className={styles.statNum}>{avgScore}</Text>
             <Text className={styles.statLabel}>情绪指数</Text>
+            {hasPrevData && <DiffIndicator current={parseFloat(avgScore)} prev={parseFloat(prevAvgScore)} />}
           </View>
         </View>
+
+        <View className={styles.statsRow}>
+          <View className={styles.statCard}>
+            <Text className={styles.statNum}>{avgIntensity}</Text>
+            <Text className={styles.statLabel}>平均强度</Text>
+          </View>
+        </View>
+
+        {hasPrevData && (
+          <View className={styles.section}>
+            <Text className={styles.sectionTitle}>📊 与上月对比</Text>
+            <View className={styles.card}>
+              <View className={styles.compareRow}>
+                <Text className={styles.compareLabel}>打卡天数</Text>
+                <View className={styles.compareValues}>
+                  <Text className={styles.comparePrev}>{prevTotalCheckIns}天</Text>
+                  <Text className={styles.compareArrow}>→</Text>
+                  <Text className={styles.compareCurrent}>{totalCheckIns}天</Text>
+                  <DiffIndicator current={totalCheckIns} prev={prevTotalCheckIns} unit="天" />
+                </View>
+              </View>
+              <View className={styles.compareRow}>
+                <Text className={styles.compareLabel}>主打情绪</Text>
+                <View className={styles.compareValues}>
+                  <Text className={styles.comparePrev}>{prevMostCommonEmotionData.emoji} {prevMostCommonEmotionData.label}</Text>
+                  <Text className={styles.compareArrow}>→</Text>
+                  <Text className={styles.compareCurrent}>{mostCommonEmotionData.emoji} {mostCommonEmotionData.label}</Text>
+                </View>
+              </View>
+              <View className={styles.compareRow}>
+                <Text className={styles.compareLabel}>情绪指数</Text>
+                <View className={styles.compareValues}>
+                  <Text className={styles.comparePrev}>{prevAvgScore}</Text>
+                  <Text className={styles.compareArrow}>→</Text>
+                  <Text className={styles.compareCurrent}>{avgScore}</Text>
+                  <DiffIndicator current={parseFloat(avgScore)} prev={parseFloat(prevAvgScore)} />
+                </View>
+              </View>
+              <View className={styles.compareRow}>
+                <Text className={styles.compareLabel}>社区互动</Text>
+                <View className={styles.compareValues}>
+                  <Text className={styles.comparePrev}>{prevTotalLikes + prevTotalComments}次</Text>
+                  <Text className={styles.compareArrow}>→</Text>
+                  <Text className={styles.compareCurrent}>{totalLikes + totalComments}次</Text>
+                  <DiffIndicator current={totalLikes + totalComments} prev={prevTotalLikes + prevTotalComments} unit="次" />
+                </View>
+              </View>
+            </View>
+          </View>
+        )}
 
         <View className={styles.section}>
           <Text className={styles.sectionTitle}>打卡日历</Text>

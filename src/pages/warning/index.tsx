@@ -3,6 +3,7 @@ import { View, Text, ScrollView, Button } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import styles from './index.module.scss';
 import { mockAgencies } from '@/data/mockAnalysis';
+import { useDiaryStore } from '@/store/useDiaryStore';
 
 const suggestions = [
   {
@@ -32,7 +33,47 @@ const suggestions = [
   }
 ];
 
+const categoryMap: Record<string, string> = {
+  breath: '呼吸练习',
+  sleep: '睡眠建议',
+  activity: '可执行任务',
+  social: '社交互动',
+  mindfulness: '正念练习'
+};
+
+const categoryOrder = ['breath', 'sleep', 'activity', 'social', 'mindfulness'];
+
 const WarningPage: React.FC = () => {
+  const copingTasks = useDiaryStore(state => state.appState.copingTasks);
+  const toggleCopingTask = useDiaryStore(state => state.toggleCopingTask);
+  const resetCopingTasks = useDiaryStore(state => state.resetCopingTasks);
+
+  const completedCount = copingTasks.filter(t => t.completed).length;
+  const totalCount = copingTasks.length;
+
+  const groupedTasks = categoryOrder.reduce<{ category: string; label: string; tasks: typeof copingTasks }[]>((acc, cat) => {
+    const tasks = copingTasks.filter(t => t.category === cat);
+    if (tasks.length > 0) {
+      acc.push({ category: cat, label: categoryMap[cat], tasks });
+    }
+    return acc;
+  }, []);
+
+  const handleResetPlan = () => {
+    Taro.showModal({
+      title: '重置计划',
+      content: '确定要重置所有调适任务吗？已完成的项目将恢复为未完成状态。',
+      confirmText: '确定重置',
+      cancelText: '取消',
+      confirmColor: '#FF6B6B',
+      success: (res) => {
+        if (res.confirm) {
+          resetCopingTasks();
+        }
+      }
+    });
+  };
+
   const handleCallPhone = (phone: string) => {
     Taro.makePhoneCall({ phoneNumber: phone });
   };
@@ -66,6 +107,48 @@ const WarningPage: React.FC = () => {
           <Text className={styles.crisisDesc}>如果情绪严重影响生活，请拨打心理援助热线</Text>
         </View>
         <Text className={styles.crisisArrow}>›</Text>
+      </View>
+
+      <View className={styles.planSection}>
+        <Text className={styles.sectionTitle}>📋 你的调适计划</Text>
+
+        <View className={styles.progressRow}>
+          <Text className={styles.progressText}>{completedCount}/{totalCount} 已完成</Text>
+          <View className={styles.progressBar}>
+            <View
+              className={styles.progressFill}
+              style={{ width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%` }}
+            />
+          </View>
+        </View>
+
+        {groupedTasks.map(group => (
+          <View key={group.category} className={styles.categoryGroup}>
+            <Text className={styles.categoryTitle}>{group.label}</Text>
+            {group.tasks.map(task => (
+              <View
+                key={task.id}
+                className={`${styles.taskCard} ${task.completed ? styles.taskCardCompleted : ''}`}
+                onClick={() => toggleCopingTask(task.id)}
+              >
+                <View className={`${styles.taskCheckbox} ${task.completed ? styles.taskCheckboxChecked : ''}`}>
+                  {task.completed ? '✅' : ''}
+                </View>
+                <Text className={styles.taskIcon}>{task.icon}</Text>
+                <View className={styles.taskInfo}>
+                  <Text className={`${styles.taskTitle} ${task.completed ? styles.taskTitleCompleted : ''}`}>
+                    {task.title}
+                  </Text>
+                  <Text className={styles.taskDesc}>{task.desc}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        ))}
+
+        <Button className={styles.resetBtn} onClick={handleResetPlan}>
+          重置计划
+        </Button>
       </View>
 
       <View className={styles.section}>

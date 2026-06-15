@@ -1,34 +1,30 @@
 import React from 'react';
-import { View, Text, ScrollView, Button, Switch, Picker } from '@tarojs/components';
+import { View, Text, ScrollView, Button, Switch, Picker, Input } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import styles from './index.module.scss';
 import { useDiaryStore } from '@/store/useDiaryStore';
 
 const SettingsPage: React.FC = () => {
   const reminder = useDiaryStore(state => state.reminder);
-  const setReminder = useDiaryStore(state => state.setReminder);
+  const setReminders = useDiaryStore(state => state.setReminders);
+  const addReminder = useDiaryStore(state => state.addReminder);
+  const updateReminder = useDiaryStore(state => state.updateReminder);
+  const removeReminder = useDiaryStore(state => state.removeReminder);
   const isAdmin = useDiaryStore(state => state.appState.isAdmin);
   const toggleAdminMode = useDiaryStore(state => state.toggleAdminMode);
   const getPendingReports = useDiaryStore(state => state.getPendingReports);
 
-  const [enabled, setEnabled] = React.useState(reminder.enabled);
-  const [time, setTime] = React.useState(reminder.time);
-
-  React.useEffect(() => {
-    setEnabled(reminder.enabled);
-    setTime(reminder.time);
-  }, [reminder.enabled, reminder.time]);
-
-  const handleTimeChange = (e: any) => {
-    setTime(e.detail.value);
-  };
-
-  const handleToggle = (checked: boolean) => {
-    setEnabled(checked);
+  const handleAddReminder = () => {
+    addReminder({
+      id: Date.now().toString(),
+      enabled: true,
+      time: '08:00',
+      label: '新提醒'
+    });
   };
 
   const handleSave = () => {
-    setReminder({ enabled, time });
+    setReminders({ items: reminder.items });
     Taro.showToast({
       title: '设置已保存',
       icon: 'success',
@@ -76,38 +72,38 @@ const SettingsPage: React.FC = () => {
       <View className={styles.section}>
         <Text className={styles.sectionTitle}>每日提醒</Text>
         <View className={styles.card}>
-          <View className={styles.row}>
-            <View className={styles.rowLeft}>
-              <Text className={styles.rowIcon}>⏰</Text>
-              <View>
-                <Text className={styles.rowLabel}>打卡提醒</Text>
-                <Text className={styles.rowDesc}>开启后每日定时提醒记录情绪</Text>
+          {reminder.items.map((item) => (
+            <View key={item.id} className={styles.reminderItem}>
+              <View className={styles.reminderRow}>
+                <View className={styles.reminderLeft}>
+                  <Switch
+                    checked={item.enabled}
+                    onChange={(e) => updateReminder(item.id, { enabled: e.detail.value })}
+                    color="#FF9B7B"
+                  />
+                  <Picker mode="time" value={item.time} onChange={(e) => updateReminder(item.id, { time: e.detail.value })}>
+                    <View className={styles.timePicker}>
+                      <Text className={styles.timeText}>{item.time}</Text>
+                      <Text className={styles.arrow}>›</Text>
+                    </View>
+                  </Picker>
+                </View>
+                <View className={styles.deleteBtn} onClick={() => removeReminder(item.id)}>
+                  <Text className={styles.deleteText}>删除</Text>
+                </View>
               </View>
+              <Input
+                className={styles.labelInput}
+                value={item.label}
+                placeholder="提醒标签"
+                onInput={(e) => updateReminder(item.id, { label: e.detail.value })}
+              />
             </View>
-            <Switch
-              checked={enabled}
-              onChange={(e) => handleToggle(e.detail.value)}
-              color="#FF9B7B"
-            />
-          </View>
+          ))}
 
-          {enabled && (
-            <View className={styles.row}>
-              <View className={styles.rowLeft}>
-                <Text className={styles.rowIcon}>🕐</Text>
-                <View>
-                  <Text className={styles.rowLabel}>提醒时间</Text>
-                  <Text className={styles.rowDesc}>每天将在 {time} 提醒你记录心情</Text>
-                </View>
-              </View>
-              <Picker mode="time" value={time} onChange={handleTimeChange}>
-                <View className={styles.timePicker}>
-                  <Text className={styles.timeText}>{time}</Text>
-                  <Text className={styles.arrow}>›</Text>
-                </View>
-              </Picker>
-            </View>
-          )}
+          <View className={styles.addBtn} onClick={handleAddReminder}>
+            <Text className={styles.addBtnText}>+ 添加提醒</Text>
+          </View>
         </View>
       </View>
 

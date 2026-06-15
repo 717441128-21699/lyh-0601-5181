@@ -1,84 +1,125 @@
-import React from 'react';
-import { View, Text, ScrollView } from '@tarojs/components';
+import React, { useState, useMemo } from 'react';
+import { View, Text, ScrollView, Input } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import styles from './index.module.scss';
 import { useDiaryStore } from '@/store/useDiaryStore';
 import EmotionPieChart from '@/components/EmotionPieChart';
 import EmotionLineChart from '@/components/EmotionLineChart';
 import { getEmotionScore, extractKeywords, analyzeNegativeEmotions, getEmotionByType } from '@/utils/emotion';
-import { getWeekDates, formatDate } from '@/utils/date';
+import { formatDate, getDateRange } from '@/utils/date';
 import { EmotionType } from '@/types';
+
+type RangeTab = '7d' | '30d' | 'custom';
+
+const RANGE_LABELS: Record<RangeTab, string> = {
+  '7d': '最近7天',
+  '30d': '最近30天',
+  custom: '自定义'
+};
+
+const NEGATIVE_EMOTIONS: EmotionType[] = ['sad', 'anxious', 'angry', 'tired'];
 
 const AnalysisPage: React.FC = () => {
   const diaries = useDiaryStore(state => state.diaries);
-  const { dates: weekDates, start, end } = getWeekDates();
+  const [activeTab, setActiveTab] = useState<RangeTab>('7d');
+  const [customStart, setCustomStart] = useState('');
+  const [customEnd, setCustomEnd] = useState('');
 
-  const weekDiariesWithData = weekDates
-    .map(date => {
-      const diary = diaries.find(d => d.date === date);
-      return diary ? {
-        date,
-        emotion: diary.emotion,
-        score: getEmotionScore(diary.emotion),
-        hasRecord: true
-      } : {
-        date,
-        emotion: null as unknown as EmotionType,
-        score: 0,
-        hasRecord: false
-      };
+  const rangeInput = useMemo(() => {
+    if (activeTab === 'custom' && customStart && customEnd) {
+      return { start: customStart, end: customEnd };
+    }
+    return activeTab;
+  }, [activeTab, customStart, customEnd]);
+
+  const { dates: rangeDates, start: rangeStart, end: rangeEnd } = useMemo(
+    () => getDateRange(rangeInput),
+    [rangeInput]
+  );
+
+  const diariesInRange = useMemo(() => {
+    return diaries.filter(d => rangeDates.includes(d.date));
+  }, [diaries, rangeDates]);
+
+  const checkInDays = diariesInRange.length;
+
+  const distribution: Record<EmotionType, number> = useMemo(() => {
+    const dist: Record<EmotionType, number> = {
+      happy: 0, calm: 0, sad: 0, anxious: 0, angry: 0, tired: 0
+    };
+    diariesInRange.forEach(d => {
+      dist[d.emotion] = (dist[d.emotion] || 0) + 1;
     });
+    return dist;
+  }, [diariesInRange]);
 
-  const actualWeekDiaries = weekDiariesWithData.filter(d => d.hasRecord);
-  const checkInDays = actualWeekDiaries.length;
+  const allContent = useMemo(
+    () => diariesInRange.map(d => d.content),
+    [diariesInRange]
+  );
+  const keywords = useMemo(() => extractKeywords(allContent), [allContent]);
 
-  console.log('[Analysis] 本周实际打卡:', { checkInDays, total: weekDates.length });
+  const lineChartData = useMemo(
+    () => diariesInRange.map(d => ({
+      date: d.date,
+      emotion: d.emotion,
+      score: getEmotionScore(d.emotion)
+    })),
+    [diariesInRange]
+  );
 
-  const distribution: Record<EmotionType, number> = {
-    happy: 0,
-    calm: 0,
-    sad: 0,
-    anxious: 0,
-    angry: 0,
-    tired: 0
-  };
-  actualWeekDiaries.forEach(d => {
-    distribution[d.emotion] = (distribution[d.emotion] || 0) + 1;
-  });
+  const avgScore = useMemo(() => {
+    if (diariesInRange.length === 0) return '0.0';
+    const total = diariesInRange.reduce((sum, d) => sum + getEmotionScore(d.emotion), 0);
+    return (total / diariesInRange.length).toFixed(1);
+  }, [diariesInRange]);
 
-  const allContent = diaries.filter(d => weekDates.includes(d.date)).map(d => d.content);
-  const keywords = extractKeywords(allContent);
+  const positiveDays = useMemo(
+    () => diariesInRange.filter(d => !NEGATIVE_EMOTIONS.includes(d.emotion)).length,
+    [diariesInRange]
+  );
 
-  const lineChartData = actualWeekDiaries.map(d => ({
-    date: d.date,
-    emotion: d.emotion,
-    score: d.score
-  }));
+  const negativeDiaries = useMemo(
+    () => diariesInRange.filter(d => NEGATIVE_EMOTIONS.includes(d.emotion)),
+    [diariesInRange]
+  );
 
-  console.log('[Analysis] 折线图数据（仅实际打卡）:', lineChartData.map(d => ({ date: d.date, score: d.score })));
+  const avgNegativeIntensity = useMemo(() => {
+    if (negativeDiaries.length === 0) return 0;
+    const total = negativeDiaries.reduce((sum, d) => sum + d.intensity, 0);
+    return +(total / negativeDiaries.length).toFixed(1);
+  }, [negativeDiaries]);
 
-  const actualEmotionRecords = actualWeekDiaries.map(d => ({
-    date: d.date,
-    emotion: d.emotion
-  }));
-  const { triggered: warningTriggered, days, ratio: negativeRatio } = analyzeNegativeEmotions(actualEmotionRecords, 0.6);
+  const highIntensityCount = useMemo(
+    () => diariesInRange.filter(d => NEGATIVE_EMOTIONS.includes(d.emotion) && d.intensity >= 7).length,
+    [diariesInRange]
+  );
 
-  const avgScore = actualWeekDiaries.length > 0
-    ? (actualWeekDiaries.reduce((sum, d) => sum + d.score, 0) / actualWeekDiaries.length).toFixed(1)
-    : '0.0';
+  const { triggered: warningTriggered, days, ratio: negativeRatio, isStrongWarning } = useMemo(() => {
+    const emotionRecords = diariesInRange.map(d => ({
+      date: d.date,
+      emotion: d.emotion
+    }));
+    const result = analyzeNegativeEmotions(emotionRecords, 0.6);
 
-  const positiveDays = actualWeekDiaries.filter(d => {
-    const negatives: EmotionType[] = ['sad', 'anxious', 'angry', 'tired'];
-    return !negatives.includes(d.emotion);
-  }).length;
+    if (result.triggered) {
+      const consecutiveDates = result.consecutiveDays.map(cd => cd.date);
+      const consecutiveDiaries = diariesInRange.filter(d => consecutiveDates.includes(d.date));
+      const consecutiveNeg = consecutiveDiaries.filter(d => NEGATIVE_EMOTIONS.includes(d.emotion));
+      if (consecutiveNeg.length > 0) {
+        const avgIntensity = consecutiveNeg.reduce((s, d) => s + d.intensity, 0) / consecutiveNeg.length;
+        if (avgIntensity >= 7) {
+          return { ...result, isStrongWarning: true };
+        }
+      }
+      return { ...result, isStrongWarning: false };
+    }
 
-  console.log('[Analysis] 预警检查:', {
-    actualRecords: actualEmotionRecords.length,
-    needs3Days: actualEmotionRecords.length >= 3,
-    warningTriggered,
-    negativeRatio: (negativeRatio * 100).toFixed(1) + '%',
-    days
-  });
+    return { ...result, isStrongWarning: false };
+  }, [diariesInRange]);
+
+  const startStr = formatDate(rangeStart, 'MM月DD日');
+  const endStr = formatDate(rangeEnd, 'MM月DD日');
 
   const handleViewWarning = () => {
     Taro.navigateTo({ url: '/pages/warning/index' });
@@ -88,23 +129,65 @@ const AnalysisPage: React.FC = () => {
     Taro.navigateTo({ url: '/pages/monthly-report/index' });
   };
 
-  const weekStartStr = formatDate(start, 'MM月DD日');
-  const weekEndStr = formatDate(end, 'MM月DD日');
+  const handleTabChange = (tab: RangeTab) => {
+    setActiveTab(tab);
+    if (tab !== 'custom') {
+      setCustomStart('');
+      setCustomEnd('');
+    }
+  };
+
+  const isEmpty = checkInDays === 0;
 
   return (
     <ScrollView className={styles.page} scrollY>
       <View className={styles.header}>
         <Text className={styles.title}>情绪分析</Text>
-        <Text className={styles.subtitle}>本周 {weekStartStr} - {weekEndStr}</Text>
+        <Text className={styles.subtitle}>{startStr} - {endStr}</Text>
       </View>
+
+      <View className={styles.rangeTabs}>
+        {(Object.keys(RANGE_LABELS) as RangeTab[]).map(tab => (
+          <View
+            key={tab}
+            className={`${styles.rangeTab} ${activeTab === tab ? styles.rangeTabActive : ''}`}
+            onClick={() => handleTabChange(tab)}
+          >
+            <Text>{RANGE_LABELS[tab]}</Text>
+          </View>
+        ))}
+      </View>
+
+      {activeTab === 'custom' && (
+        <View className={styles.dateRangeRow}>
+          <Input
+            className={styles.dateInput}
+            type='text'
+            placeholder='开始日期 YYYY-MM-DD'
+            value={customStart}
+            onInput={e => setCustomStart(e.detail.value)}
+          />
+          <Text style={{ margin: '0 8rpx', color: '#999' }}>~</Text>
+          <Input
+            className={styles.dateInput}
+            type='text'
+            placeholder='结束日期 YYYY-MM-DD'
+            value={customEnd}
+            onInput={e => setCustomEnd(e.detail.value)}
+          />
+        </View>
+      )}
 
       {warningTriggered && (
         <View className={styles.warningBanner} onClick={handleViewWarning}>
-          <Text className={styles.warningIcon}>⚠️</Text>
+          <Text className={styles.warningIcon}>{isStrongWarning ? '🔴' : '⚠️'}</Text>
           <View className={styles.warningContent}>
-            <Text className={styles.warningTitle}>负面情绪预警</Text>
+            <Text className={styles.warningTitle}>
+              {isStrongWarning ? '高强度负面情绪预警' : '负面情绪预警'}
+            </Text>
             <Text className={styles.warningDesc}>
-              连续{days}天记录中负面情绪占比 {(negativeRatio * 100).toFixed(0)}%，点击查看建议
+              连续{days}天记录中负面情绪占比 {(negativeRatio * 100).toFixed(0)}%
+              {isStrongWarning ? '，平均强度≥7，请及时关注' : '，点击查看建议'}
             </Text>
           </View>
           <Text className={styles.warningArrow}>›</Text>
@@ -126,15 +209,22 @@ const AnalysisPage: React.FC = () => {
         </View>
       </View>
 
+      {highIntensityCount > 0 && (
+        <View className={styles.highIntensityCard}>
+          <Text className={styles.highIntensityValue}>{highIntensityCount}</Text>
+          <Text className={styles.highIntensityLabel}>高强度负面记录（强度≥7）</Text>
+        </View>
+      )}
+
       <View className={styles.section}>
         <Text className={styles.sectionTitle}>情绪分布</Text>
         <View className={styles.card}>
-          {checkInDays > 0 ? (
-            <EmotionPieChart data={distribution} />
-          ) : (
+          {isEmpty ? (
             <View className={styles.emptyTip}>
-              <Text className={styles.emptyText}>本周还没有打卡记录哦～</Text>
+              <Text className={styles.emptyText}>无数据</Text>
             </View>
+          ) : (
+            <EmotionPieChart data={distribution} />
           )}
         </View>
       </View>
@@ -142,11 +232,51 @@ const AnalysisPage: React.FC = () => {
       <View className={styles.section}>
         <Text className={styles.sectionTitle}>情绪变化趋势</Text>
         <View className={styles.card}>
-          {checkInDays > 0 ? (
+          {isEmpty ? (
+            <View className={styles.emptyTip}>
+              <Text className={styles.emptyText}>无数据</Text>
+            </View>
+          ) : (
             <EmotionLineChart data={lineChartData} />
+          )}
+        </View>
+      </View>
+
+      <View className={styles.section}>
+        <Text className={styles.sectionTitle}>
+          负面情绪强度{negativeDiaries.length > 0 ? `（均值 ${avgNegativeIntensity}）` : ''}
+        </Text>
+        <View className={styles.card}>
+          {negativeDiaries.length > 0 ? (
+            <View style={{ display: 'flex', flexWrap: 'wrap', gap: '16rpx' }}>
+              {negativeDiaries.map(d => {
+                const emo = getEmotionByType(d.emotion);
+                return (
+                  <View
+                    key={d.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8rpx',
+                      padding: '8rpx 16rpx',
+                      background: '#FFF5F5',
+                      borderRadius: '8rpx'
+                    }}
+                  >
+                    <Text>{emo.emoji}</Text>
+                    <Text style={{ fontSize: '24rpx', color: '#666' }}>
+                      {formatDate(d.date, 'MM/DD')}
+                    </Text>
+                    <Text style={{ fontSize: '24rpx', fontWeight: 600, color: d.intensity >= 7 ? '#FF6B6B' : '#999' }}>
+                      强度{d.intensity}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
           ) : (
             <View className={styles.emptyTip}>
-              <Text className={styles.emptyText}>开始打卡后就能看到情绪变化啦</Text>
+              <Text className={styles.emptyText}>无数据</Text>
             </View>
           )}
         </View>
@@ -175,7 +305,7 @@ const AnalysisPage: React.FC = () => {
             </View>
           ) : (
             <View className={styles.emptyTip}>
-              <Text className={styles.emptyText}>记录更多心情来生成关键词云吧</Text>
+              <Text className={styles.emptyText}>无数据</Text>
             </View>
           )}
         </View>

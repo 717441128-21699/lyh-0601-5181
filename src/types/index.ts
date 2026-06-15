@@ -12,6 +12,7 @@ export interface DiaryEntry {
   id: string;
   date: string;
   emotion: EmotionType;
+  intensity: number;
   content: string;
   images: string[];
   tags: string[];
@@ -75,13 +76,29 @@ export interface MonthlyReport {
   badgesEarned: Badge[];
 }
 
-export interface ReminderSettings {
+export interface ReminderItem {
+  id: string;
   enabled: boolean;
   time: string;
+  label: string;
   nextTriggerAt?: number;
+}
+
+export interface ReminderSettings {
+  items: ReminderItem[];
+}
+
+export interface CopingTask {
+  id: string;
+  title: string;
+  desc: string;
+  icon: string;
+  completed: boolean;
+  category: 'breath' | 'sleep' | 'activity' | 'social' | 'mindfulness';
 }
 
 export interface AppState {
   likedPostIds: string[];
   isAdmin: boolean;
+  copingTasks: CopingTask[];
 }

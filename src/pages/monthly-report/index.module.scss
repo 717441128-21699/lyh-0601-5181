@@ -172,6 +172,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: $spacing-sm 0;
+
+  &:not(:last-child) {
+    border-bottom: 1rpx solid $color-divider;
+  }
 }
 
 .interactLabel {
@@ -215,4 +220,67 @@
   &:active {
     opacity: 0.9;
   }
+}
+
+.summaryChange {
+  font-size: $font-size-sm;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: $spacing-sm;
+}
+
+.diffUp {
+  font-size: $font-size-xs;
+  color: #4CAF50;
+  margin-left: $spacing-xs;
+}
+
+.diffDown {
+  font-size: $font-size-xs;
+  color: #FF6B6B;
+  margin-left: $spacing-xs;
+}
+
+.diffZero {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-left: $spacing-xs;
+}
+
+.compareRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md 0;
+
+  &:not(:last-child) {
+    border-bottom: 1rpx solid $color-divider;
+  }
+}
+
+.compareLabel {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  flex-shrink: 0;
+}
+
+.compareValues {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.comparePrev {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.compareArrow {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.compareCurrent {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
 }

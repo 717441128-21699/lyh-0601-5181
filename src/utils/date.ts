@@ -57,3 +57,37 @@ export const getRelativeTime = (timestamp: number): string => {
 };
 
 export const getCurrentMonth = (): string => formatDate(new Date(), 'YYYY-MM');
+
+type DateRangeInput = '7d' | '30d' | { start: string; end: string };
+
+export const getDateRange = (range: DateRangeInput): { dates: string[]; start: string; end: string } => {
+  const today = new Date(getToday());
+  let startDate: Date;
+  let endDate: Date;
+
+  if (range === '7d') {
+    endDate = new Date(today);
+    startDate = new Date(today);
+    startDate.setDate(today.getDate() - 6);
+  } else if (range === '30d') {
+    endDate = new Date(today);
+    startDate = new Date(today);
+    startDate.setDate(today.getDate() - 29);
+  } else {
+    startDate = new Date(range.start);
+    endDate = new Date(range.end);
+  }
+
+  const dates: string[] = [];
+  const current = new Date(startDate);
+  while (current <= endDate) {
+    dates.push(formatDate(current, 'YYYY-MM-DD'));
+    current.setDate(current.getDate() + 1);
+  }
+
+  return {
+    dates,
+    start: formatDate(startDate, 'YYYY-MM-DD'),
+    end: formatDate(endDate, 'YYYY-MM-DD')
+  };
+};

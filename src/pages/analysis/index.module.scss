@@ -23,6 +23,55 @@
   color: $color-text-tertiary;
 }
 
+.rangeTabs {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.rangeTab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-sm 0;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  transition: all $transition-base;
+
+  text {
+    font-size: $font-size-sm;
+  }
+}
+
+.rangeTabActive {
+  background: $color-primary;
+  color: $color-text-white;
+
+  text {
+    color: $color-text-white;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.dateRangeRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+.dateInput {
+  flex: 1;
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  padding: $spacing-sm $spacing-md;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  border: 2rpx solid #eee;
+}
+
 .warningBanner {
   display: flex;
   align-items: center;
@@ -89,6 +138,28 @@
   color: $color-text-tertiary;
 }
 
+.highIntensityCard {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF9B7B 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-lg $spacing-md;
+  margin-bottom: $spacing-md;
+  gap: $spacing-md;
+}
+
+.highIntensityValue {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-white;
+}
+
+.highIntensityLabel {
+  font-size: $font-size-sm;
+  color: rgba(255, 255, 255, 0.9);
+  flex: 1;
+}
+
 .section {
   margin-bottom: $spacing-md;
 }
@@ -121,6 +192,13 @@
   padding: $spacing-xs $spacing-sm;
   font-weight: $font-weight-medium;
   transition: all $transition-base;
+}
+
+.emptyTip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200rpx;
 }
 
 .emptyText {

@@ -30,7 +30,7 @@ const DiaryCard: React.FC<DiaryCardProps> = ({ diary, onClick }) => {
         </View>
         <View className={styles.info}>
           <Text className={styles.date}>{formatDate(diary.date, 'MM月DD日')}</Text>
-          <Text className={styles.emotionLabel} style={{ color: emotion.color }}>{emotion.label}</Text>
+          <Text className={styles.emotionLabel} style={{ color: emotion.color }}>{emotion.label}{diary.intensity ? ` · 强度${diary.intensity}` : ''}</Text>
         </View>
       </View>
       <Text className={styles.content}>{diary.content}</Text>

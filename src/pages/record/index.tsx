@@ -12,6 +12,7 @@ const RecordPage: React.FC = () => {
   const addDiary = useDiaryStore(state => state.addDiary);
 
   const [emotion, setEmotion] = useState<EmotionType | undefined>();
+  const [intensity, setIntensity] = useState(5);
   const [content, setContent] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
@@ -85,6 +86,7 @@ const RecordPage: React.FC = () => {
       addDiary({
         date: getToday(),
         emotion,
+        intensity,
         content: content.trim(),
         images,
         tags
@@ -113,6 +115,29 @@ const RecordPage: React.FC = () => {
         <Text className={styles.label}>今天的心情如何？</Text>
         <EmotionPicker selected={emotion} onSelect={setEmotion} size="md" />
       </View>
+
+      {emotion && (
+        <View className={styles.section}>
+          <View className={styles.intensityHeader}>
+            <Text className={styles.label}>情绪强度</Text>
+            <Text className={styles.intensityValue}>{intensity}/10</Text>
+          </View>
+          <View className={styles.intensityRow}>
+            <Text className={styles.intensityLabel}>轻微</Text>
+            <View className={styles.sliderWrap}>
+              <input
+                type="range"
+                min={1}
+                max={10}
+                value={intensity}
+                onChange={(e: any) => setIntensity(Number(e.target.value))}
+                className={styles.slider}
+              />
+            </View>
+            <Text className={styles.intensityLabel}>强烈</Text>
+          </View>
+        </View>
+      )}
 
       <View className={styles.section}>
         <Text className={styles.label}>写下此刻的感受</Text>

@@ -58,7 +58,7 @@ const MinePage: React.FC = () => {
 
   const menuItems = [
     { icon: '📅', label: '月度报告', desc: '查看本月综合分析', onClick: handleMonthlyReport },
-    { icon: '⏰', label: '提醒设置', desc: reminder.enabled ? `每天 ${reminder.time} 提醒` : '未开启', onClick: handleSettings },
+    { icon: '⏰', label: '提醒设置', desc: (() => { const enabledCount = reminder.items.filter(i => i.enabled).length; return enabledCount > 0 ? `${enabledCount}个提醒已开启` : '未开启'; })(), onClick: handleSettings },
     { icon: '🏥', label: '心理咨询', desc: '附近心理咨询机构', onClick: handleAgencies }
   ];
 
